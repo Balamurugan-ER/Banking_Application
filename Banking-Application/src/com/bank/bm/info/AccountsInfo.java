@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bank.bm.pojo;
+package com.bank.bm.info;
 
 /**
  * @author Balamurugan
@@ -15,8 +15,9 @@ public class AccountsInfo
 	private String branch;
 	private String status;
 	private String type;
-	private long balance;
+	private Integer balance;
 	private long deposit;
+	private int atmPin;
 	public int getUserId() {
 		return userId;
 	}
@@ -53,10 +54,10 @@ public class AccountsInfo
 	public void setType(String type) {
 		this.type = type;
 	}
-	public long getBalance() {
+	public Integer getBalance() {
 		return balance;
 	}
-	public void setBalance(long balance) {
+	public void setBalance(Integer balance) {
 		this.balance = balance;
 	}
 	public long getDeposit() {
@@ -64,6 +65,12 @@ public class AccountsInfo
 	}
 	public void setDeposit(long deposit) {
 		this.deposit = deposit;
+	}
+	public void setAtmPin(int oldpin,int newPin) {
+		if(this.atmPin == oldpin)
+		{
+			this.atmPin = newPin;
+		}
 	}
 	public String toString()
 	{

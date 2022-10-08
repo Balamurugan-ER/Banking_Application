@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bank.bm.banking;
+package com.bank.bm.authentication;
 
 import java.util.HashMap;
 

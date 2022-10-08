@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bank.bm.pojo;
+package com.bank.bm.info;
 
 /**
  * @author Balamurugan

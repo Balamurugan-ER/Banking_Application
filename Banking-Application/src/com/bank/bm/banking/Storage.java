@@ -3,8 +3,9 @@
  */
 package com.bank.bm.banking;
 
-import com.bank.bm.pojo.AccountsInfo;
-import com.bank.bm.pojo.UserInfo;
+import com.bank.bm.info.AccountsInfo;
+import com.bank.bm.info.UserInfo;
+import com.bank.bm.util.BMException;
 
 /**
  * @author Balamurugan
@@ -12,27 +13,44 @@ import com.bank.bm.pojo.UserInfo;
  */
 public interface Storage 
 {
-	// adding dump data to storage layer
-	public void addDumpData();
+//	// adding dump data to storage layer
+//	public void dumpUserProfileData();
+//	
+//	// adding dump to storage layer
+//	public void dumpAccountsData();
 	
 	// Retrieve data from layer
-	public UserInfo getUserInfo(Integer userId);
+	public UserInfo getUserInfo(Integer userId) throws BMException;
 	
-	// 
-	public AccountsInfo getMyAccount(Integer userId,Long accountNumber);
+	// return your account
+	public AccountsInfo getMyAccount(Integer userId,Integer accountNumber) throws BMException;
 	
-	public Integer getBalance(Integer userId,Long accountNumber);
+	// return your current balance
+	public Integer getBalance(Integer userId,Integer accountNumber) throws BMException;
 	
-	public void deposit(Integer userId,Long accountNumber,Integer amount);
+	// deposit to your personal account
+	public void selfDeposit(Integer userId,Integer accountNumber,Integer amount) throws BMException;
 	
-	public void withDraw(Integer userId,Long accountNumber,Integer amount);
+	// deposit to another account
 	
-	public void changeEmail(Integer userId,String email);
+	public void otherDeposit(Integer accountNumber, Integer amount) throws BMException;
 	
-	public void changeMobileNumber(Integer userId,Integer number);
+	// withdraw money from your account
+	public void withDraw(Integer userId,Integer accountNumber,Integer amount) throws BMException;
 	
-	public void moneyTransfer(Integer userId,Integer senderAccountNo,Integer receiverAccountNo,Integer amount);
+	// change your email
+	public void changeEmail(Integer userId,String email) throws BMException;
 	
+	// change your mobile number
+	public void changeMobileNumber(Integer userId,Integer number) throws BMException;
 	
+	// change your password
+	public void updatePassword(Integer userId,String oldPassword,String newPassword) throws BMException;
+	
+	// transfer your money from your account to another account
+	public void moneyTransfer(Integer userId,Integer senderAccountNo,Integer receiverAccountNo,Integer amount) throws BMException;
+	
+	// change atm pin
+	public void updateAtmPin(Integer userId,Integer accountNumber,Integer oldPin,Integer newPin) throws BMException;
 	
 }

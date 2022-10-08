@@ -9,8 +9,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bank.bm.banking.BMFileLayer;
-
 /**
  * @author Balamurugan
  *
@@ -21,8 +19,8 @@ public class BankMain
 	static Logger logFile = Logger.getLogger(BankMain.class.getName());
 	static Logger logConsole = Logger.getLogger(BankMain.class.getName());
 	public static void main(String[] args) 
-	{
-		boolean flag = false;
+	{		
+		boolean bankingAccess = false;
 		try 
 		{
 			fileHandler  = new FileHandler("BankMain.log");
@@ -36,13 +34,14 @@ public class BankMain
 		{
 			e1.printStackTrace();
 		}
-		while(!BankAuthentication.isAuthenticated())
+		BankAuthentication userAuth = new BankAuthentication();
+		while(!userAuth.isAuthenticated())
 		{
-			BankAuthentication.main(null);
-			flag = true;
+			userAuth.loginPage();
+			bankingAccess = true;
 			break;
 		}
-		while(flag)
+		while(bankingAccess)
 		{
 			logConsole.log(Level.INFO, "Enter Banking Options\n1.Display Info");
 			Scanner scan = new Scanner(System.in);
@@ -51,17 +50,17 @@ public class BankMain
 			{
 			case 1:
 			{
-				BMFileLayer cache = new BMFileLayer();
-				cache.addDumpData();
+				
+				//cache.addDumpData();
 				logConsole.log(Level.INFO, "Enter UserId to Check User Details");
-				Integer uid = scan.nextInt();
-				logConsole.log(Level.INFO, "{0}",cache.getData(uid));
-				logConsole.log(Level.INFO, "{0}",cache.getAccountsInfo(uid));
+				//Integer uid = scan.nextInt();
+				//logConsole.log(Level.INFO, "{0}",cache.getData(uid));
+				//logConsole.log(Level.INFO, "{0}",cache.getAccountsInfo(uid));
 				break;
 			}
 			case 0:
 			{
-				flag = false;
+				bankingAccess = false;
 				break;
 			}
 			default:

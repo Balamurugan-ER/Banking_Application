@@ -7,7 +7,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bank.bm.banking.Authentication;
+import com.bank.bm.authentication.Authentication;
 import com.bank.bm.util.BMException;
 
 /**
@@ -16,9 +16,9 @@ import com.bank.bm.util.BMException;
  */
 public class BankAuthentication {
 
-	private static boolean authenticated;
+	private boolean authenticated;
 	
-	public static boolean isAuthenticated() {
+	public boolean isAuthenticated() {
 		return authenticated;
 	}
 	static Logger logConsole = Logger.getLogger(BankAuthentication.class.getName());
@@ -27,7 +27,7 @@ public class BankAuthentication {
 		Authentication.addDumpUsers();
 		return Authentication.login(username, password);
 	}
-	public static int main(String[] args) 
+	public int loginPage() 
 	{
 		if(authenticated)
 		{
@@ -54,7 +54,7 @@ public class BankAuthentication {
 		}
 		else
 		{
-			BankAuthentication.main(null);
+			loginPage();
 		}
 		scan.close();
 		return response;

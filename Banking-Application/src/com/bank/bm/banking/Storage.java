@@ -34,4 +34,5 @@ public interface Storage
 	public void moneyTransfer(Integer userId,Integer senderAccountNo,Integer receiverAccountNo,Integer amount);
 	
 	
+	
 }

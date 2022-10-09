@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bank.bm.info;
+package com.credence.bank.info;
 
 /**
  * @author Balamurugan
@@ -66,11 +66,11 @@ public class AccountsInfo
 	public void setDeposit(long deposit) {
 		this.deposit = deposit;
 	}
-	public void setAtmPin(int oldpin,int newPin) {
-		if(this.atmPin == oldpin)
-		{
-			this.atmPin = newPin;
-		}
+	public void setAtmPin(int atmPin) {
+		this.atmPin = atmPin;
+	}
+	public int getAtmPin() {
+		return atmPin;
 	}
 	public String toString()
 	{

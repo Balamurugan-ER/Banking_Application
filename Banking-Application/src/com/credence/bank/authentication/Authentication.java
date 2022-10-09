@@ -1,12 +1,12 @@
 /**
  * 
  */
-package com.bank.bm.authentication;
+package com.credence.bank.authentication;
 
 import java.util.HashMap;
 
-import com.bank.bm.util.BMException;
-import com.bank.bm.util.Utilities;
+import com.credence.bank.util.BMException;
+import com.credence.bank.util.Utilities;
 
 /**
  * @author Balamurugan

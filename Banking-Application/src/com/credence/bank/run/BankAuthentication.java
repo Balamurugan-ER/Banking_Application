@@ -1,14 +1,14 @@
 /**
  * 
  */
-package com.bank.bm.run;
+package com.credence.bank.run;
 
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bank.bm.authentication.Authentication;
-import com.bank.bm.util.BMException;
+import com.credence.bank.authentication.Authentication;
+import com.credence.bank.util.BMException;
 
 /**
  * @author Balamurugan

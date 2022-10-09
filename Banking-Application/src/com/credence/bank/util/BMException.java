@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bank.bm.util;
+package com.credence.bank.util;
 
 /**
  * @author Balamurugan

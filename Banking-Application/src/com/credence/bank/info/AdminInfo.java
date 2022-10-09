@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bank.bm.info;
+package com.credence.bank.info;
 
 /**
  * @author Balamurugan

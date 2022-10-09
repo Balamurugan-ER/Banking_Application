@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bank.bm.banking;
+package com.credence.bank.banking;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,11 +10,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.Map;
 
-import com.bank.bm.info.AccountsInfo;
-import com.bank.bm.info.UserInfo;
-import com.bank.bm.util.BMException;
-import com.bank.bm.util.Utilities;
+import com.credence.bank.info.AccountsInfo;
+import com.credence.bank.info.UserInfo;
+import com.credence.bank.util.BMException;
+import com.credence.bank.util.Utilities;
 
 /**
  * @author Balamurugan
@@ -209,14 +210,21 @@ public enum FBanking implements Storage
 	@Override
 	public Integer getBalance(Integer userId, Integer accountNumber) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountNumber);
 		AccountsInfo myAccount = getMyAccount(userId,accountNumber); 
+		Utilities.INST.isNull(myAccount);
 		return myAccount.getBalance();
 	}
 
 	@Override
 	public void selfDeposit(Integer userId, Integer accountNumber, Integer amount) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(amount);
 		AccountsInfo myAccount = getMyAccount(userId, accountNumber);
+		Utilities.INST.isNull(myAccount);
 		Integer currentBalance = myAccount.getBalance();
 		currentBalance += amount;
 		myAccount.setBalance(currentBalance);
@@ -225,15 +233,10 @@ public enum FBanking implements Storage
 	@Override
 	public void otherDeposit(Integer accountNumber, Integer amount) throws BMException 
 	{
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(amount);
 		AccountsInfo receiverAccount = accountDetails.get(accountNumber);
-		try
-		{
-			Utilities.INST.isNull(receiverAccount);
-		}
-		catch(BMException e)
-		{
-			throw new BMException("Could not Find Account Info");
-		}
+		Utilities.INST.isNull(receiverAccount);
 		Integer currentBalance = receiverAccount.getBalance();
 		currentBalance += amount;
 		receiverAccount.setBalance(currentBalance);
@@ -242,7 +245,11 @@ public enum FBanking implements Storage
 	@Override
 	public void withDraw(Integer userId, Integer accountNumber, Integer amount) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(amount);
 		AccountsInfo myAccount = getMyAccount(userId,accountNumber);
+		Utilities.INST.isNull(myAccount);
 		Integer currentBalance = myAccount.getBalance();
 		if(currentBalance < amount)
 		{
@@ -255,38 +262,33 @@ public enum FBanking implements Storage
 	@Override
 	public void changeEmail(Integer userId, String email) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(email);
+		Utilities.INST.isEmail(email);
 		UserInfo myInfo = getUserInfo(userId);
+		Utilities.INST.isNull(myInfo);
 		myInfo.setEmail(email);
 	}
 
 	@Override
 	public void changeMobileNumber(Integer userId, Integer number) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(number);
 		UserInfo myInfo = getUserInfo(userId);
+		Utilities.INST.isNull(myInfo);
 		myInfo.setPhone(number);
 	}
 
 	@Override
 	public void updatePassword(Integer userId, String oldPassword, String newPassword) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(oldPassword);
+		Utilities.INST.isNull(newPassword);
+		Utilities.INST.isPassword(newPassword);
 		UserInfo myInfo = getUserInfo(userId);
 		String orgPassword = myInfo.getPassword();
-		try
-		{
-			Utilities.INST.isNull(newPassword);
-		}
-		catch(BMException e)
-		{
-			throw new BMException("New Password should not be null");
-		}
-		try
-		{
-			Utilities.INST.isNull(orgPassword);
-		}
-		catch(BMException e)
-		{
-			throw new BMException("Old Password Should not be Null");
-		}
 		if(orgPassword.equals(oldPassword))
 		{
 			myInfo.setPassword(newPassword);
@@ -296,16 +298,14 @@ public enum FBanking implements Storage
 	@Override
 	public void moneyTransfer(Integer userId, Integer senderAccountNo, Integer receiverAccountNo, Integer amount) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(senderAccountNo);
+		Utilities.INST.isNull(receiverAccountNo);
+		Utilities.INST.isNull(amount);
 		AccountsInfo myAccount = getMyAccount(userId, senderAccountNo);
 		AccountsInfo receiverAccount = accountDetails.get(receiverAccountNo);
-		try
-		{
-			Utilities.INST.isNull(receiverAccount);
-		}
-		catch(BMException e)
-		{
-			throw new BMException("Could not Find Account Info");
-		}
+		Utilities.INST.isNull(myAccount);
+		Utilities.INST.isNull(receiverAccount);
 		Integer senderCurrentBalance = myAccount.getBalance();
 		if(senderCurrentBalance < amount)
 		{
@@ -319,16 +319,107 @@ public enum FBanking implements Storage
 	@Override
 	public void updateAtmPin(Integer userId, Integer accountNumber, Integer oldPin, Integer newPin) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(oldPin);
+		Utilities.INST.isNull(newPin);
 		AccountsInfo myAccount = getMyAccount(userId, accountNumber);
-		try
+		Utilities.INST.isNull(myAccount);
+		Integer pin = myAccount.getAtmPin();
+		if(pin == oldPin)
 		{
-			Utilities.INST.isNull(newPin);
+			myAccount.setAtmPin(newPin);
 		}
-		catch(BMException e)
-		{
-			throw new BMException("New Pin cannot be null");
-		}
-		myAccount.setAtmPin(oldPin, newPin);
+	}
+	@Override
+	public void changeName(Integer userId, String name) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(name);
+		UserInfo userInfo = getUserInfo(userId);
+		Utilities.INST.isNull(userInfo);
+		userInfo.setName(name);
+	}
+	@Override
+	public void changeRole(Integer userId, String role) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(role);
+		UserInfo userInfo = getUserInfo(userId);
+		Utilities.INST.isNull(userInfo);
+		userInfo.setRole(role);
+	}
+	@Override
+	public void changeCity(Integer userId, String name) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(name);
+		UserInfo userInfo = getUserInfo(userId);
+		Utilities.INST.isNull(userInfo);
+		userInfo.setCity(name);
+	}
+	//TODO Debug 
+	@Override
+	public void changeType(Integer userId, String type) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(type);
+		AccountsInfo accountsInfo = accountDetails.get(userId);
+		Utilities.INST.isNull(accountsInfo);
+		accountsInfo.setType(type);
+	}
+	@Override
+	public void changeAadhar(Integer userId, Integer aadharNumber) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(aadharNumber);
+		UserInfo userInfo = getUserInfo(userId);
+		Utilities.INST.isNull(userInfo);
+		userInfo.setAadhar(aadharNumber);
+	}
+	@Override
+	public Map<?, ?> getMyAccountsInfo(Integer userId) throws BMException 
+	{
+		return customerInfo.get(userId);
+	}
+	@Override
+	public void fixedDeposit(Integer accountNumber, Integer amount) throws BMException 
+	{
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(amount);
+		AccountsInfo accountsInfo = accountDetails.get(accountNumber);
+		Utilities.INST.isNull(accountsInfo);
+		accountsInfo.setDeposit(amount);
+		
+	}
+	@Override
+	public void createUser(UserInfo userInfo) throws BMException 
+	{
+		Utilities.INST.isNull(userInfo);
+		userDetails.put(userInfo.getUserId(), userInfo);
+	}
+	@Override
+	public void removeUser(Integer userId) throws BMException
+	{
+		Utilities.INST.isNull(userId);
+		UserInfo userInfo = getUserInfo(userId);
+		Utilities.INST.isNull(userInfo);
+		userInfo.setStatus("Inactive");
+	}
+	@Override
+	public void createAccount(Integer userId, AccountsInfo accountsInfo) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountsInfo);
+		accountDetails.put((int) accountsInfo.getAccountNumber(), accountsInfo);
+		customerInfo.put(accountsInfo.getUserId(), accountDetails);		
+	}
+	@Override
+	public void deleteAccount(Integer userId, AccountsInfo accountsInfo) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountsInfo);
+		accountsInfo.setStatus("Inactive");
 	}
 
 }

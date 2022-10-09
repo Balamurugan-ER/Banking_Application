@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bank.bm.info;
+package com.credence.bank.info;
 
 /**
  * @author Balamurugan
@@ -17,6 +17,7 @@ public class UserInfo
 	private long aadhar;
 	private String city;
 	private String role;
+	private String status;
 	public int getUserId() {
 		return userId;
 	}
@@ -64,6 +65,12 @@ public class UserInfo
 	}
 	public void setRole(String role) {
 		this.role = role;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 	@Override
 	public String toString()

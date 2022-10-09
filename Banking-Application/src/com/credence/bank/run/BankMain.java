@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bank.bm.run;
+package com.credence.bank.run;
 
 import java.io.IOException;
 import java.util.Scanner;

@@ -1,11 +1,13 @@
 /**
  * 
  */
-package com.bank.bm.banking;
+package com.credence.bank.banking;
 
-import com.bank.bm.info.AccountsInfo;
-import com.bank.bm.info.UserInfo;
-import com.bank.bm.util.BMException;
+import java.util.Map;
+
+import com.credence.bank.info.AccountsInfo;
+import com.credence.bank.info.UserInfo;
+import com.credence.bank.util.BMException;
 
 /**
  * @author Balamurugan
@@ -46,11 +48,41 @@ public interface Storage
 	
 	// change your password
 	public void updatePassword(Integer userId,String oldPassword,String newPassword) throws BMException;
+	//..TODO
+	// change your update name
+	public void changeName(Integer userId,String name) throws BMException;
 	
+	// change your update role
+	public void changeRole(Integer userId,String role) throws BMException;
+		
+	// change your update city
+	public void changeCity(Integer userId,String name) throws BMException;
+
+	// change your update type
+	public void changeType(Integer userId,String type) throws BMException;
+	
+	// change your update aadhar
+	public void changeAadhar(Integer userId,Integer aadharNumber) throws BMException;
+	
+	//TODO end../
 	// transfer your money from your account to another account
 	public void moneyTransfer(Integer userId,Integer senderAccountNo,Integer receiverAccountNo,Integer amount) throws BMException;
 	
 	// change atm pin
 	public void updateAtmPin(Integer userId,Integer accountNumber,Integer oldPin,Integer newPin) throws BMException;
+	
+	//return map of accounts for a given user
+	public Map<?,?> getMyAccountsInfo(Integer userId) throws BMException;
+	
+	// fixed deposit 
+	public void fixedDeposit(Integer accountNumber,Integer amount) throws BMException;
+	
+	public void createUser(UserInfo userInfo) throws BMException;
+	
+	public void removeUser(Integer userId) throws BMException;
+	
+	public void createAccount(Integer userId,AccountsInfo accountsInfo) throws BMException;
+	
+	public void deleteAccount(Integer userId,AccountsInfo accountsInfo) throws BMException;
 	
 }

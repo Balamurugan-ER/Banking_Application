@@ -15,37 +15,38 @@ import com.credence.bank.util.BMException;
  */
 public interface BankingRouter 
 {
-	//TODO add user
-	public Integer addUser(UserInfo userInfo) throws BMException;
+	/**
+	 * 
+	 * @param userInfo
+	 * @return
+	 * @throws BMException
+	 */
+	public boolean addUser(UserInfo userInfo) throws BMException;
 	
-	//TODO create account
-	public Integer createAccount(Integer userId,AccountsInfo accountInfo) throws BMException;
+	public boolean createAccount(Integer userId,AccountsInfo accountInfo) throws BMException;
 	
 	//TODO remove user
-	public Integer removeUser(Integer userId) throws BMException;
+	public boolean removeUser(Integer userId) throws BMException;
 	
 	//TODO check balance
 	public Integer checkBalance(Integer userId,Integer accountNumber) throws BMException;
 	
 	// withdraw money from your account
-	public Integer withDraw(Integer userId,Integer accountNumber,Integer amount) throws BMException;
+	public boolean withDraw(Integer userId,Integer accountNumber,Integer amount) throws BMException;
 	
 	//TODO money transfer self 
 	//Hint same user different account
-	public Integer selfTransfer(Integer userId,Integer fromAccountNumber,Integer toAccountNumber,Integer amount) throws BMException;
+	public boolean selfTransfer(Integer userId,Integer fromAccountNumber,Integer toAccountNumber,Integer amount) throws BMException;
 	
 	//TODO money transfer others
-	public Integer othersTransfer(Integer userId,Integer fromAccountNumber,Integer toAccountNumber,Integer amount) throws BMException;
+	public boolean othersTransfer(Integer userId,Integer fromAccountNumber,Integer toAccountNumber,Integer amount) throws BMException;
 	
 	//TODO self deposit
-	public Integer selfDeposit(Integer userId,Integer accountNumber,Integer amount) throws BMException;
+	public boolean selfDeposit(Integer userId,Integer accountNumber,Integer amount) throws BMException;
 	
 	//TODO deposit others
 	// transfer only using account number
-	public Integer othersDeposit(Integer accountNumber,Integer amount) throws BMException;
-	
-	//TODO money fixed deposit
-	public Integer fixedDeposit(Integer accountNumber,Integer amount) throws BMException;
+	public boolean othersDeposit(Integer accountNumber,Integer amount) throws BMException;
 	
 	//TODO display profile userInfo
 	public UserInfo getProfileInfo(Integer userId) throws BMException;
@@ -57,32 +58,32 @@ public interface BankingRouter
 	public AccountsInfo getMyAccountInfo(Integer userId,Integer accountNumber) throws BMException;
 		
 	//TODO close account
-	public Integer closeAccount(Integer userId,AccountsInfo accountsInfo) throws BMException;
+	public boolean closeAccount(Integer userId,AccountsInfo accountsInfo) throws BMException;
 	
 	//TODO change mobile number
-	public Integer updateMobileNumber(Integer userId,Integer phoneNumber) throws BMException;
+	public boolean updateMobileNumber(Integer userId,Integer phoneNumber) throws BMException;
 	
 	//TODO change email id
-	public Integer updateEmail(Integer userId,String email) throws BMException;
+	public boolean updateEmail(Integer userId,String email) throws BMException;
 	
 	//TODO update aadhar number
-	public Integer updateAadhar(Integer userId,Integer aadharNumber) throws BMException;
+	public boolean updateAadhar(Integer userId,Integer aadharNumber) throws BMException;
 	
 	//TODO update name
-	public Integer updateName(Integer userId,String name) throws BMException;
+	public boolean updateName(Integer userId,String name) throws BMException;
 	
 	//TODO change role
-	public Integer updateRole(Integer userId,String role) throws BMException;
+	public boolean updateRole(Integer userId,String role) throws BMException;
 	
 	//TODO change password
-	public Integer updatePassword(Integer userId,String oldPassword,String newPassword) throws BMException;
+	public boolean updatePassword(Integer userId,String oldPassword,String newPassword) throws BMException;
 	
 	//TODO change city
-	public Integer changeCity(Integer userId,String city) throws BMException;
+	public boolean changeCity(Integer userId,String city) throws BMException;
 	
 	//TODO change type of account
-	public Integer changeType(Integer accountNumber,String type) throws BMException;
+	public boolean changeType(Integer accountNumber,String type) throws BMException;
 	
 	//TODO update atmpin
-	public Integer changeAtmPin(Integer userId,Integer accountNumber, Integer oldPin, Integer newPin) throws BMException;
+	public boolean changeAtmPin(Integer userId,Integer accountNumber, Integer oldPin, Integer newPin) throws BMException;
 }

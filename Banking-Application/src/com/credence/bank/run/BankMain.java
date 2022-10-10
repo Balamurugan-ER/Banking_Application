@@ -9,6 +9,11 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.credence.bank.banking.DBBanking;
+import com.credence.bank.banking.FBanking;
+import com.credence.bank.util.BMException;
+import com.credence.bank.util.Utilities;
+
 /**
  * @author Balamurugan
  *
@@ -19,20 +24,20 @@ public class BankMain
 	static Logger logFile = Logger.getLogger(BankMain.class.getName());
 	static Logger logConsole = Logger.getLogger(BankMain.class.getName());
 	public static void main(String[] args) 
-	{		
+	{
 		boolean bankingAccess = false;
 		try 
 		{
 			fileHandler  = new FileHandler("BankMain.log");
 			logFile.addHandler(fileHandler);
 		} 
-		catch (SecurityException e1) 
+		catch (SecurityException e) 
 		{
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
-		catch (IOException e1) 
+		catch (IOException e) 
 		{
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
 		BankAuthentication userAuth = new BankAuthentication();
 		while(!userAuth.isAuthenticated())

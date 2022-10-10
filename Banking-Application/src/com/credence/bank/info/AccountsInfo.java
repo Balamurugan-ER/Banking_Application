@@ -16,7 +16,6 @@ public class AccountsInfo
 	private String status;
 	private String type;
 	private Integer balance;
-	private long deposit;
 	private int atmPin;
 	public int getUserId() {
 		return userId;
@@ -57,14 +56,9 @@ public class AccountsInfo
 	public Integer getBalance() {
 		return balance;
 	}
-	public void setBalance(Integer balance) {
+	public void setBalance(Integer balance) 
+	{
 		this.balance = balance;
-	}
-	public long getDeposit() {
-		return deposit;
-	}
-	public void setDeposit(long deposit) {
-		this.deposit = deposit;
 	}
 	public void setAtmPin(int atmPin) {
 		this.atmPin = atmPin;
@@ -74,7 +68,7 @@ public class AccountsInfo
 	}
 	public String toString()
 	{
-		String row = "{ "+getUserId()+","+getAccountNumber()+","+getIfsc()+","+getBalance()+","+getBranch()+","+getDeposit()+","+getType()+","+getStatus()+" }";
+		String row = "{ "+getUserId()+","+getAccountNumber()+","+getIfsc()+","+getBalance()+","+getBranch()+","+getType()+","+getStatus()+" }";
 		return row;
 	}
 }

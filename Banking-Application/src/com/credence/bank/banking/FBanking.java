@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.credence.bank.info.AccountsInfo;
@@ -25,12 +26,22 @@ import com.credence.bank.util.Utilities;
 public enum FBanking implements Storage
 {
 	INST;
-	private HashMap<Integer,UserInfo> userDetails = new HashMap<>();
-	private HashMap<Integer,AccountsInfo> accountDetails = new HashMap<>();
-	private HashMap<Integer, HashMap<Integer, AccountsInfo>> customerInfo = new HashMap<>();
+	private Map<Integer,UserInfo> userDetails = new HashMap<>();
+	private Map<Integer,AccountsInfo> accountDetails = new HashMap<>();
+	private Map<Integer, Map<Integer, AccountsInfo>> customerInfo = new HashMap<>();
 	private String userDetailSer = "FBankingUserDetails.ser";
-	private String accountDetailSer = "FBankingUserDetails.ser";
-	private String customerInfoSer = "FBankingUserDetails.ser";
+	private String accountDetailSer = "FBankingAccountDetails.ser";
+	private String customerInfoSer = "FBankingCustomerInfo.ser";
+	@Override
+	public void setup() throws BMException
+	{
+		load();
+	}
+	@Override
+	public void saveChanges() throws BMException 
+	{
+		store();
+	}
 	private void writeData(String fileName,Object object) throws BMException
 	{
 		try(FileOutputStream writeFile = new FileOutputStream(fileName);
@@ -40,13 +51,12 @@ public enum FBanking implements Storage
 		} 
 		catch (FileNotFoundException e) 
 		{	
-			throw new BMException(e.getMessage());
+			throw new BMException(e.getMessage(),e);
 		}
 		catch (IOException e) 
 		{	
-			throw new BMException(e.getMessage());
+			throw new BMException(e.getMessage(),e);
 		}
-
 	}
 	private Object loadData(String fileName) throws BMException
 	{
@@ -57,11 +67,11 @@ public enum FBanking implements Storage
 		} 
 		catch (ClassNotFoundException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException(e.getMessage(),e);
 		}
 		catch (IOException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException(e.getMessage(),e);
 		} 	
 	}
 	public void store() throws BMException
@@ -73,126 +83,50 @@ public enum FBanking implements Storage
 	@SuppressWarnings("unchecked")
 	public void load() throws BMException
 	{
-		accountDetails = (HashMap<Integer, AccountsInfo>) loadData(accountDetailSer);
-		userDetails = (HashMap<Integer, UserInfo>) loadData(userDetailSer);
-		customerInfo = (HashMap<Integer, HashMap<Integer, AccountsInfo>>) loadData(customerInfoSer);
+		accountDetails = (Map<Integer, AccountsInfo>) loadData(accountDetailSer);
+		userDetails = (Map<Integer, UserInfo>) loadData(userDetailSer);
+		customerInfo = (Map<Integer, Map<Integer, AccountsInfo>>) loadData(customerInfoSer);
 	}
-	//@Override
-	public void dumpUserProfileData() 
+	@Override
+	public void dumpUserProfileData(List<UserInfo> userInfo) throws BMException 
 	{
-
-		UserInfo user = new UserInfo();
-		user.setUserId(1);
-		user.setName("Bala");
-		user.setEmail("Bala@zohocorp.com");
-		user.setAadhar(123456789);
-		user.setCity("Madurai");
-		user.setRole("Customer");
-		user.setPassword("Bala@123");
-		user.setPhone(80907060);
-		userDetails.put(1, user);
-		user.setUserId(2);
-		user.setName("John");
-		user.setEmail("John@wwe.com");
-		user.setAadhar(987654321);
-		user.setCity("Chennai");
-		user.setRole("Customer");
-		user.setPassword("John@123");
-		user.setPhone(65432781);
-		userDetails.put(2, user);
-		user.setUserId(3);
-		user.setName("Randy");
-		user.setEmail("Randy@zohocorp.com");
-		user.setAadhar(5324178);
-		user.setCity("Tenkasi");
-		user.setRole("Customer");
-		user.setPassword("Randy@123");
-		user.setPhone(775533221);
-		userDetails.put(3, user);
-		user.setUserId(4);
-		user.setName("Batista");
-		user.setEmail("Manager@wwe.com");
-		user.setAadhar(44332211);
-		user.setCity("Coimbatore");
-		user.setRole("Customer");
-		user.setPassword("Batista@123");
-		user.setPhone(80907060);
-		userDetails.put(4, user);
-		user.setUserId(5);
-		user.setName("Sachin");
-		user.setEmail("Sachin@zohocorp.com");
-		user.setAadhar(2276410);
-		user.setCity("Karaikudi");
-		user.setRole("Admin");
-		user.setPassword("Sachin@123");
-		user.setPhone(1010203040);
-		userDetails.put(5, user);
+		Utilities.INST.isNull(userInfo);
+		for(UserInfo user: userInfo)
+		{
+			Utilities.INST.isNull(user);
+			userDetails.put(user.getUserId(), user);
+		}
 	}
-
-
-
-	//@Override
-	public void dumpAccountsData() 
+	@Override
+	public void dumpAccountsData(List<AccountsInfo> accountsInfo) throws BMException 
 	{
-		AccountsInfo accountsInfo = new AccountsInfo();
-		accountsInfo.setUserId(1);
-		accountsInfo.setAccountNumber(123321456);
-		accountsInfo.setBalance(1000);
-		accountsInfo.setBranch("Madurai");
-		accountsInfo.setDeposit(10000);
-		accountsInfo.setIfsc("IYZ123098");
-		accountsInfo.setStatus("Active");
-		accountsInfo.setType("Savings");
-		accountDetails.put(123321456, accountsInfo);
-		customerInfo.put(1, accountDetails);
-		accountsInfo.setUserId(2);
-		accountsInfo.setAccountNumber(3245289);
-		accountsInfo.setBalance(1500);
-		accountsInfo.setBranch("Karaikudi");
-		accountsInfo.setDeposit(20000);
-		accountsInfo.setIfsc("IYZUO765");
-		accountsInfo.setStatus("Active");
-		accountsInfo.setType("Savings");
-		accountDetails.put(3245289, accountsInfo);
-		customerInfo.put(2, accountDetails);
-		accountsInfo.setUserId(3);
-		accountsInfo.setAccountNumber(876543321);
-		accountsInfo.setBalance(5000);
-		accountsInfo.setBranch("Chennai");
-		accountsInfo.setDeposit(7000);
-		accountsInfo.setIfsc("ZC123098");
-		accountsInfo.setStatus("Active");
-		accountsInfo.setType("Current");
-		accountDetails.put(3, accountsInfo);
-		customerInfo.put(3, accountDetails);
-
+		Utilities.INST.isNull(accountsInfo);
+		for(AccountsInfo accounts : accountsInfo)
+		{
+			Utilities.INST.isNull(accounts);
+			accountDetails.put((int) accounts.getAccountNumber(), accounts);
+			customerInfo.put(accounts.getUserId(), accountDetails);
+		}
 	}
-
 	@Override
 	public UserInfo getUserInfo(Integer userId) throws BMException 
 	{	
+		Utilities.INST.isNull(userId);
 		UserInfo userInfo = userDetails.get(userId);
-		try
-		{
-			Utilities.INST.isNull(userInfo);
-		}
-		catch(BMException e)
-		{
-			throw new BMException("No user Info Found");
-		}
+		Utilities.INST.isNull(userInfo);
 		return userInfo;
 	}
 
 	@Override
 	public AccountsInfo getMyAccount(Integer userId, Integer accountNumber) throws BMException {
-		HashMap<Integer,AccountsInfo> myAccounts = customerInfo.get(userId);
+		Map<Integer,AccountsInfo> myAccounts = customerInfo.get(userId);
 		try
 		{
 			Utilities.INST.isNull(myAccounts);			
 		}
 		catch(BMException e)
 		{
-			throw new BMException("No matching Accounts Found");
+			throw new BMException("No matching Accounts Found",e);
 		}
 		AccountsInfo accountInfo = myAccounts.get(accountNumber);
 		try
@@ -201,7 +135,7 @@ public enum FBanking implements Storage
 		}
 		catch(BMException e)
 		{
-			throw new BMException("Invalid account Number");
+			throw new BMException("Invalid account Number",e);
 		}
 
 		return accountInfo;
@@ -381,16 +315,6 @@ public enum FBanking implements Storage
 	public Map<?, ?> getMyAccountsInfo(Integer userId) throws BMException 
 	{
 		return customerInfo.get(userId);
-	}
-	@Override
-	public void fixedDeposit(Integer accountNumber, Integer amount) throws BMException 
-	{
-		Utilities.INST.isNull(accountNumber);
-		Utilities.INST.isNull(amount);
-		AccountsInfo accountsInfo = accountDetails.get(accountNumber);
-		Utilities.INST.isNull(accountsInfo);
-		accountsInfo.setDeposit(amount);
-		
 	}
 	@Override
 	public void createUser(UserInfo userInfo) throws BMException 

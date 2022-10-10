@@ -3,22 +3,14 @@
  */
 package com.credence.bank.banking;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-
 import com.credence.bank.info.AccountsInfo;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.util.BMException;
@@ -28,22 +20,30 @@ import com.credence.bank.util.Utilities;
  * @author Balamurugan
  *
  */
-public enum BankingDB implements Storage 
+public enum DBBanking implements Storage 
 {
 	INST;
-	private Connection connection;
-	private void establishConnection()
+	@Override
+	public void setup() {}
+	@Override
+	public void saveChanges() throws BMException {}
+	private Connection getConnection() throws BMException
 	{
+		Connection connection = null;
+		String url = EnvProperties.INST.envProps.getProperty("url");
+		String userName = EnvProperties.INST.envProps.getProperty("username");
+		String password = EnvProperties.INST.envProps.getProperty("password");
 		try 
 		{
-			connection = DriverManager.getConnection(EnvProperties.INST.envProps.getProperty("url"), EnvProperties.INST.envProps.getProperty("username"), EnvProperties.INST.envProps.getProperty("password"));
+			connection = DriverManager.getConnection(url,userName,password);
 		} 
 		catch (SQLException e) 
 		{
-			e.printStackTrace();
+			throw new BMException("connection failed",e);
 		}
+		return connection;
 	}
-	private void closeConnection() throws BMException
+	private void closeConnection(Connection connection) throws BMException
 	{
 		try 
 		{
@@ -51,24 +51,19 @@ public enum BankingDB implements Storage
 		}
 		catch (SQLException e) 
 		{
-			// TODO Auto-generated catch block
-			throw new BMException(e.getMessage());
+			throw new BMException("Failed to Close Connection",e);
 		}
 	}
-	BankingDB()
-	{
-		establishConnection();
-	}
-
 	@Override
 	public UserInfo getUserInfo(Integer userId) throws BMException 
 	{
 		Utilities.INST.isNull(userId);
 		// TODO getUserInfo
-		String query = "SELECT * FROM Info WHERE UserId=?";
+		String query = "SELECT * FROM Info WHERE UserId=? ;";
 		UserInfo userInfo = new UserInfo();
-		ResultSet result = null;
-		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
+		Connection connection = getConnection();
+		try(PreparedStatement prepareStatement = connection.prepareStatement(query);
+				ResultSet result = prepareStatement.getResultSet()) 
 		{
 			prepareStatement.setInt(1, userId);
 			boolean response = prepareStatement.execute();
@@ -78,8 +73,6 @@ public enum BankingDB implements Storage
 			}
 			if(response)
 			{
-				result = prepareStatement.getResultSet();
-
 				while(result.next())
 				{
 					userInfo.setUserId(result.getInt(1));
@@ -95,16 +88,11 @@ public enum BankingDB implements Storage
 		} 
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("get UserInfo failed",e);
 		}
 		finally
 		{
-			closeConnection();
-			try 
-			{
-				result.close();
-			} 
-			catch (SQLException e) {}
+			closeConnection(connection);
 		}
 		return userInfo;
 
@@ -115,10 +103,11 @@ public enum BankingDB implements Storage
 		// TODO getMyAccount
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountNumber);
-		String query = "SELECT * FROM Accounts WHERE AccountNumber=? AND UserId = ?";
-		ResultSet result = null;
+		String query = "SELECT * FROM Accounts WHERE AccountNumber=? AND UserId = ? ;";
 		AccountsInfo accountsInfo = new AccountsInfo();
-		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
+		Connection connection = getConnection();
+		try(PreparedStatement prepareStatement = connection.prepareStatement(query);
+				ResultSet result = prepareStatement.getResultSet()) 
 		{
 			prepareStatement.setInt(1, accountNumber);
 			prepareStatement.setInt(2, userId);
@@ -129,7 +118,6 @@ public enum BankingDB implements Storage
 			}
 			if(rescode)
 			{
-				result = prepareStatement.getResultSet();
 				while(result.next())
 				{
 					accountsInfo.setUserId(result.getInt(1));
@@ -139,23 +127,17 @@ public enum BankingDB implements Storage
 					accountsInfo.setType(result.getString(5));
 					accountsInfo.setStatus(result.getString(6));
 					accountsInfo.setBalance(result.getInt(7));
-					accountsInfo.setDeposit(result.getInt(8));
-					accountsInfo.setAtmPin(result.getInt(9));
+					accountsInfo.setAtmPin(result.getInt(8));
 				}
 			}
 		}
 		catch (SQLException e)
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Failed to Fetch AccountInfo",e);
 		}
 		finally
 		{
-			closeConnection();
-			try 
-			{
-				result.close();
-			} 
-			catch (SQLException e) {}
+			closeConnection(connection);
 		}
 		return accountsInfo;
 	}
@@ -165,33 +147,28 @@ public enum BankingDB implements Storage
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountNumber);
 		// TODO getBalance
-		String query = "SELECT Balance FROM Accounts WHERE UserId = ? AND AccountNumber = ?";
-		ResultSet result = null;
-		Integer balance = -1213;
-		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
+		String query = "SELECT Balance FROM Accounts WHERE UserId = ? AND AccountNumber = ?;";
+		Integer balance = null;
+		Connection connection = getConnection();
+		try(PreparedStatement prepareStatement = connection.prepareStatement(query);
+				ResultSet result = prepareStatement.getResultSet()) 
 		{
 			prepareStatement.setInt(1, userId);
 			prepareStatement.setInt(2, accountNumber);
 			boolean response = prepareStatement.execute();
 			if(response)
 			{
-				result = prepareStatement.getResultSet();
 				result.next();
 				balance = result.getInt(1);
 			}
 		}
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Failed to Get Balance", e);
 		}
 		finally
 		{
-			closeConnection();
-			try 
-			{
-				result.close();
-			} 
-			catch (SQLException e) {}
+			closeConnection(connection);
 		}
 		return balance;
 	}
@@ -203,24 +180,23 @@ public enum BankingDB implements Storage
 		Utilities.INST.isNull(accountNumber);
 		Utilities.INST.isNull(amount);
 		// TODO selfDeposit
-		String query = "UPDATE Accounts SET Balance = ? WHERE UserId = ? AND AccountNumber = ?";
-		int balance = getBalance(userId, accountNumber);
-		balance += amount;
+		String query = "UPDATE Accounts SET Balance = Balance + ? WHERE UserId = ? AND AccountNumber = ? ;";
+		Connection connection = getConnection();
 		try (PreparedStatement prepareStatement = connection.prepareStatement(query))
 		{
 
-			prepareStatement.setInt(1, balance);
+			prepareStatement.setInt(1, amount);
 			prepareStatement.setInt(2, userId);
 			prepareStatement.setInt(3, accountNumber);
 			prepareStatement.execute();
 		}
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Self Deposit Failed",e);
 		}
 		finally
 		{
-			closeConnection();
+			closeConnection(connection);
 		}
 	}
 
@@ -229,23 +205,21 @@ public enum BankingDB implements Storage
 	{
 		Utilities.INST.isNull(accountNumber);
 		Utilities.INST.isNull(amount);
-		String query = "UPDATE Accounts SET Balance = ? WHERE AccountNumber = ?";
-		AccountsInfo accountsInfo = getMyAccount(0, accountNumber);
-		int balance = accountsInfo.getBalance();
-		balance += amount;
+		String query = "UPDATE Accounts SET Balance = Balance + ? WHERE AccountNumber = ? ;";
+		Connection connection = getConnection();
 		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
 		{
-			prepareStatement.setInt(1, balance);
+			prepareStatement.setInt(1, amount);
 			prepareStatement.setInt(2, accountNumber);
 			prepareStatement.execute();
 		} 
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Deposit Failed",e);
 		}
 		finally
 		{
-			closeConnection();
+			closeConnection(connection);
 		}
 	}
 
@@ -255,28 +229,24 @@ public enum BankingDB implements Storage
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountNumber);
 		Utilities.INST.isNull(amount);
-		String query = "UPDATE Accounts SET Balance = ? WHERE UserId = ? AND AccountNumber = ?";
-		int balance = getBalance(userId, accountNumber);
-		if(balance < amount)
-		{
-			throw new BMException("Insufficient Balance");
-		}
-		balance -= amount;
+		String query = "UPDATE Accounts SET Balance = Balance - ? WHERE UserId = ? AND AccountNumber = ? AND Balance > ? ;";
+		Connection connection = getConnection();
 		try (PreparedStatement prepareStatement = connection.prepareStatement(query))
 		{
 
-			prepareStatement.setInt(1, balance);
+			prepareStatement.setInt(1, amount);
 			prepareStatement.setInt(2, userId);
 			prepareStatement.setInt(3, accountNumber);
+			prepareStatement.setInt(4, amount);
 			prepareStatement.execute();
 		}
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Withdraw Failed",e);
 		}
 		finally
 		{
-			closeConnection();
+			closeConnection(connection);
 		}
 	}
 
@@ -288,7 +258,8 @@ public enum BankingDB implements Storage
 		Utilities.INST.isNull(value);
 		String query = "UPDATE Info SET "
 				+ field
-				+ "= ? WHERE UserId = ?";
+				+ "= ? WHERE UserId = ? ;";
+		Connection connection = getConnection();
 		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
 		{
 			prepareStatement.setObject(1, value);
@@ -297,11 +268,11 @@ public enum BankingDB implements Storage
 		}
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Failed to Change Profile Information",e);
 		}
 		finally
 		{
-			closeConnection();
+			closeConnection(connection);
 		}
 	}
 	@Override
@@ -322,7 +293,8 @@ public enum BankingDB implements Storage
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(oldPassword);
 		Utilities.INST.isNull(newPassword);
-		String query = "UPDATE Info SET Password = ? WHERE UserId = ? AND Password = ?";
+		String query = "UPDATE Info SET Password = ? WHERE UserId = ? AND Password = ? ;";
+		Connection connection = getConnection();
 		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
 		{
 			prepareStatement.setString(1, newPassword);
@@ -332,11 +304,11 @@ public enum BankingDB implements Storage
 		} 
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Failed to Update Password",e);
 		}
 		finally
 		{
-			closeConnection();
+			closeConnection(connection);
 		}
 	}
 
@@ -347,33 +319,27 @@ public enum BankingDB implements Storage
 		Utilities.INST.isNull(senderAccountNo);
 		Utilities.INST.isNull(receiverAccountNo);
 		Utilities.INST.isNull(amount);
-		String updateBalanceInfo = "UPDATE Accounts SET Balance = ? WHERE AccountNumber = ?";
-		int senderBalance = getBalance(userId, senderAccountNo);
-		AccountsInfo accountsInfo = getMyAccount(userId, receiverAccountNo);
-		int receiverBalance = accountsInfo.getBalance();
-		if(senderBalance < amount)
+		String withDrawQuery = "UPDATE Accounts SET Balance = Balance - ?  WHERE AccountNumber = ? AND Balance > ? ;";
+		String creditQuery = "UPDATE Accounts SET Balance = Balance + ?  WHERE AccountNumber = ? ;";
+		Connection connection = getConnection();
+		try(PreparedStatement withDrawStatement = connection.prepareStatement(withDrawQuery);
+				PreparedStatement creditStatement = connection.prepareStatement(creditQuery)) 
 		{
-			throw new BMException("Insufficient Balance");
-		}
-		senderBalance -= amount;
-		receiverBalance += amount;
-		try(PreparedStatement prepareStatement = connection.prepareStatement(updateBalanceInfo)) 
-		{
-			prepareStatement.setInt(1,senderBalance);
-			prepareStatement.setInt(2,senderAccountNo);
-			prepareStatement.execute();
-			prepareStatement.setInt(1,receiverBalance);
-			prepareStatement.setInt(2,receiverAccountNo);
-			prepareStatement.execute();
+			withDrawStatement.setInt(1,amount);
+			withDrawStatement.setInt(2,senderAccountNo);
+			withDrawStatement.setInt(3,amount);
+			withDrawStatement.execute();
+			creditStatement.setInt(1,amount);
+			creditStatement.setInt(2,receiverAccountNo);
+			creditStatement.execute();
 		}
 		catch (SQLException e) 
 		{
-			// TODO Auto-generated catch block
-			throw new BMException(e.getMessage());
+			throw new BMException("Transcation Failed",e);
 		}
 		finally
 		{
-			closeConnection();
+			closeConnection(connection);
 		}
 	}
 
@@ -384,7 +350,8 @@ public enum BankingDB implements Storage
 		Utilities.INST.isNull(accountNumber);
 		Utilities.INST.isNull(oldPin);
 		Utilities.INST.isNull(newPin);
-		String query = "UPDATE Accounts SET AtmPin = ? WHERE UserId = ? AND AccountNumber = ? AND AtmPin = ?";
+		String query = "UPDATE Accounts SET AtmPin = ? WHERE UserId = ? AND AccountNumber = ? AND AtmPin = ? ;";
+		Connection connection = getConnection();
 		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
 		{
 			prepareStatement.setInt(1, newPin);
@@ -396,7 +363,7 @@ public enum BankingDB implements Storage
 		catch (SQLException e) 
 		{
 			// TODO Auto-generated catch block
-			throw new BMException(e.getMessage());
+			throw new BMException("Failed to Update pin",e);
 		}
 
 
@@ -433,17 +400,16 @@ public enum BankingDB implements Storage
 	public Map<?, ?> getMyAccountsInfo(Integer userId) throws BMException 
 	{
 		Utilities.INST.isNull(userId);
-		String query = "SELECT * FROM Accounts WHERE UserId = ?";
-		ResultSet result = null;
+		String query = "SELECT * FROM Accounts WHERE UserId = ? ;";
 		Map<Integer,AccountsInfo> myAccounts = new HashMap<>();
-		try 
+		Connection connection = getConnection();
+		try(PreparedStatement preparedStatement = connection.prepareStatement(query);
+				ResultSet result = preparedStatement.getResultSet())
 		{
-			PreparedStatement preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setInt(1, userId);
 			boolean rescode = preparedStatement.execute();
 			if(rescode)
 			{
-				result = preparedStatement.getResultSet();
 				while(result.next())
 				{
 					AccountsInfo accountsInfo = new AccountsInfo();
@@ -454,7 +420,6 @@ public enum BankingDB implements Storage
 					accountsInfo.setType(result.getString(5));
 					accountsInfo.setStatus(result.getString(6));
 					accountsInfo.setBalance(result.getInt(7));
-					accountsInfo.setDeposit(result.getLong(8));
 					accountsInfo.setAtmPin(result.getInt(9));
 					myAccounts.put((int) accountsInfo.getAccountNumber(), accountsInfo);
 				}
@@ -462,68 +427,22 @@ public enum BankingDB implements Storage
 		} 
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Could not fetch accounts Info",e);
 		}
 		finally
 		{
-			closeConnection();
-			try 
-			{
-				result.close();
-			} 
-			catch (SQLException e) {}
+			closeConnection(connection);
 		}
 		return myAccounts;
-	}
-	@Override
-	public void fixedDeposit(Integer accountNumber, Integer amount) throws BMException 
-	{
-		Utilities.INST.isNull(accountNumber);
-		Utilities.INST.isNull(amount);
-		String query = "SELECT Deposit FROM Accounts WHERE AccountNumber = ?";
-		String updateQuery = "UPDATE Accounts SET Deposit = ? WHERE AccountNumber = ?";
-		Integer deposit = null;
-		ResultSet result = null;
-		try 
-		{
-			PreparedStatement preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setInt(1, accountNumber);
-			boolean rescode = preparedStatement.execute();
-			if(rescode)
-			{
-				result = preparedStatement.getResultSet();
-				result.next();
-				deposit = result.getInt(1);
-				deposit += amount;
-			}
-			preparedStatement = connection.prepareStatement(updateQuery);
-			preparedStatement.setInt(1, deposit);
-			preparedStatement.setInt(2, accountNumber);
-			preparedStatement.execute();			
-		}
-		catch (SQLException e) 
-		{
-			throw new BMException(e.getMessage());
-		}
-		finally
-		{
-			closeConnection();
-			try 
-			{
-				result.close();
-			} 
-			catch (SQLException e) {}
-		}
-
 	}
 	@Override
 	public void createUser(UserInfo userInfo) throws BMException 
 	{
 		Utilities.INST.isNull(userInfo);
-		String query = "INSERT INTO Info VALUES(?,?,?,?,?,?,?,?)";
-		try 
+		String query = "INSERT INTO Info VALUES(?,?,?,?,?,?,?,?) ;";
+		Connection connection = getConnection();
+		try(PreparedStatement preparedStatement = connection.prepareStatement(query)) 
 		{
-			PreparedStatement preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setInt(1, userInfo.getUserId());
 			preparedStatement.setString(2, userInfo.getPassword());
 			preparedStatement.setString(3, userInfo.getName());
@@ -536,11 +455,11 @@ public enum BankingDB implements Storage
 		}
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Failed to create user",e);
 		}
 		finally
 		{
-			closeConnection();
+			closeConnection(connection);
 		}
 
 	}
@@ -554,10 +473,10 @@ public enum BankingDB implements Storage
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountsInfo);
-		String query = "INSERT INTO Accounts VALUES(?,?,?,?,?,?,?,?,?)";
-		try 
+		String query = "INSERT INTO Accounts VALUES(?,?,?,?,?,?,?,?,?) ;";
+		Connection connection = getConnection();
+		try(PreparedStatement preparedStatement = connection.prepareStatement(query)) 
 		{
-			PreparedStatement preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setInt(1, accountsInfo.getUserId());
 			preparedStatement.setLong(2, accountsInfo.getAccountNumber());
 			preparedStatement.setString(3, accountsInfo.getIfsc());
@@ -565,16 +484,15 @@ public enum BankingDB implements Storage
 			preparedStatement.setString(5, accountsInfo.getType());
 			preparedStatement.setString(6, accountsInfo.getStatus());
 			preparedStatement.setInt(7, accountsInfo.getBalance());
-			preparedStatement.setLong(8, accountsInfo.getDeposit());
-			preparedStatement.setInt(9, accountsInfo.getAtmPin());
+			preparedStatement.setInt(8, accountsInfo.getAtmPin());
 		}
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Failed to create account",e);
 		}
 		finally
 		{
-			closeConnection();
+			closeConnection(connection);
 		}
 	}
 	@Override
@@ -582,22 +500,86 @@ public enum BankingDB implements Storage
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountsInfo);
-		String query = "UPDATE Accounts SET Status = \"Inactive\" WHERE AccountNumber = ? AND UserId = ?";
-		try 
+		String query = "UPDATE Accounts SET Status = \"Inactive\" WHERE AccountNumber = ? AND UserId = ? ;";
+		Connection connection = getConnection();
+		try (PreparedStatement preparedStatement = connection.prepareStatement(query))
 		{
-			PreparedStatement preparedStatement = connection.prepareStatement(query);
+			
 			preparedStatement.setLong(1, accountsInfo.getAccountNumber());
 			preparedStatement.setInt(2, accountsInfo.getUserId());
 			preparedStatement.execute();
 		}
 		catch (SQLException e) 
 		{
-			throw new BMException(e.getMessage());
+			throw new BMException("Deactivate Account Failed",e);
 		}
 		finally
 		{
-			closeConnection();
+			closeConnection(connection);
 		}
 	}
-
+	@Override
+	public void dumpUserProfileData(List<UserInfo> userInfo) throws BMException 
+	{
+		String query = "INSERT INTO Info VALUES(?,?,?,?,?,?,?,?)";
+		Connection connection = getConnection();
+		try(PreparedStatement dumpUserInfoQuery = connection.prepareStatement(query)) 
+		{
+			
+			for(UserInfo user: userInfo)
+			{
+				dumpUserInfoQuery.setInt(1, user.getUserId());
+				dumpUserInfoQuery.setString(2, user.getPassword());
+				dumpUserInfoQuery.setString(3, user.getName());
+				dumpUserInfoQuery.setString(4, user.getEmail());
+				dumpUserInfoQuery.setLong(5, user.getPhone());
+				dumpUserInfoQuery.setLong(6, user.getAadhar());
+				dumpUserInfoQuery.setString(7, user.getRole());
+				dumpUserInfoQuery.setString(8, user.getCity());
+				dumpUserInfoQuery.addBatch();
+			}
+			dumpUserInfoQuery.executeBatch();
+		} 
+		catch (SQLException e) 
+		{
+			throw new BMException("Failed To Dump Profile Records",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+	}
+	@Override
+	public void dumpAccountsData(List<AccountsInfo> accountsInfo) throws BMException 
+	{
+		String query = "INSERT INTO Accounts VALUES(?,?,?,?,?,?,?,?,?)";
+		Connection connection = getConnection();
+		try(PreparedStatement dumpAccountsInfoQuery = connection.prepareStatement(query)) 
+		{
+			
+			for(AccountsInfo account: accountsInfo)
+			{
+				dumpAccountsInfoQuery.setInt(1, account.getUserId());
+				dumpAccountsInfoQuery.setLong(2, account.getAccountNumber());
+				dumpAccountsInfoQuery.setString(3, account.getIfsc());
+				dumpAccountsInfoQuery.setString(4, account.getBranch());
+				dumpAccountsInfoQuery.setString(5, account.getType());
+				dumpAccountsInfoQuery.setString(6, account.getStatus());
+				dumpAccountsInfoQuery.setLong(7, account.getBalance());
+				dumpAccountsInfoQuery.setInt(8, account.getAtmPin());
+				dumpAccountsInfoQuery.addBatch();
+			}
+			dumpAccountsInfoQuery.executeBatch();
+		} 
+		catch (SQLException e) 
+		{
+			throw new BMException("Failed To Dump Profile Records",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		
+	}
+	
 }

@@ -3,6 +3,7 @@
  */
 package com.credence.bank.banking;
 
+import java.util.List;
 import java.util.Map;
 
 import com.credence.bank.info.AccountsInfo;
@@ -15,11 +16,14 @@ import com.credence.bank.util.BMException;
  */
 public interface Storage 
 {
-//	// adding dump data to storage layer
-//	public void dumpUserProfileData();
-//	
-//	// adding dump to storage layer
-//	public void dumpAccountsData();
+	public void setup() throws BMException;
+	
+	public void saveChanges() throws BMException;
+	// adding dump data to storage layer
+	public void dumpUserProfileData(List<UserInfo> userInfo) throws BMException;
+	
+	// adding dump to storage layer
+	public void dumpAccountsData(List<AccountsInfo> accountsInfo) throws BMException;
 	
 	// Retrieve data from layer
 	public UserInfo getUserInfo(Integer userId) throws BMException;
@@ -34,7 +38,6 @@ public interface Storage
 	public void selfDeposit(Integer userId,Integer accountNumber,Integer amount) throws BMException;
 	
 	// deposit to another account
-	
 	public void otherDeposit(Integer accountNumber, Integer amount) throws BMException;
 	
 	// withdraw money from your account
@@ -48,7 +51,7 @@ public interface Storage
 	
 	// change your password
 	public void updatePassword(Integer userId,String oldPassword,String newPassword) throws BMException;
-	//..TODO
+
 	// change your update name
 	public void changeName(Integer userId,String name) throws BMException;
 	
@@ -64,7 +67,6 @@ public interface Storage
 	// change your update aadhar
 	public void changeAadhar(Integer userId,Integer aadharNumber) throws BMException;
 	
-	//TODO end../
 	// transfer your money from your account to another account
 	public void moneyTransfer(Integer userId,Integer senderAccountNo,Integer receiverAccountNo,Integer amount) throws BMException;
 	
@@ -73,10 +75,7 @@ public interface Storage
 	
 	//return map of accounts for a given user
 	public Map<?,?> getMyAccountsInfo(Integer userId) throws BMException;
-	
-	// fixed deposit 
-	public void fixedDeposit(Integer accountNumber,Integer amount) throws BMException;
-	
+		
 	public void createUser(UserInfo userInfo) throws BMException;
 	
 	public void removeUser(Integer userId) throws BMException;

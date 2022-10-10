@@ -4,15 +4,14 @@
 package com.credence.bank.routes;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
-import java.util.Properties;
-
-import com.credence.bank.banking.BankingDB;
 import com.credence.bank.banking.EnvProperties;
 import com.credence.bank.banking.Storage;
 import com.credence.bank.info.AccountsInfo;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.util.BMException;
+import com.credence.bank.util.Utilities;
 
 /**
  * @author Balamurugan
@@ -20,97 +19,107 @@ import com.credence.bank.util.BMException;
  */
 
 //TODO null Check for all values
-public class BankingRouterProvider implements BankingRouter 
+public enum BankingRouterProvider implements BankingRouter
 {
+	INST;
 	private static Storage banking;
-	public BankingRouterProvider() throws BMException 
+	public void setup() throws BMException
 	{
 		String className = EnvProperties.INST.envProps.getProperty("storage");
 		try 
 		{	
 			Class<?> classObj = Class.forName(className);
-			banking = (Storage) classObj.newInstance();
+			Constructor<?>[] constObj = classObj.getDeclaredConstructors();
+			for(Constructor con : constObj)
+			{
+				banking = (Storage) con.newInstance(constObj);
+			}
 		}
-		catch (ClassNotFoundException e) 
+		catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+				IllegalArgumentException | InvocationTargetException e ) 
 		{
-			throw new BMException("Implementation Class not found");
+			throw new BMException("Implementation Class not found",e);
 		}
-		catch (InstantiationException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (IllegalAccessException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 	}
 	@Override
-	public Integer addUser(UserInfo userInfo) throws BMException 
+	public boolean addUser(UserInfo userInfo) throws BMException 
 	{
+		Utilities.INST.isNull(userInfo);
 		banking.createUser(userInfo);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer createAccount(Integer userId, AccountsInfo accountInfo) throws BMException
+	public boolean createAccount(Integer userId, AccountsInfo accountInfo) throws BMException
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountInfo);
 		banking.createAccount(userId, accountInfo);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer removeUser(Integer userId) throws BMException
+	public boolean removeUser(Integer userId) throws BMException
 	{
+		Utilities.INST.isNull(userId);
 		banking.removeUser(userId);
-		return 200;
+		return true;
 	}
 
 	@Override
 	public Integer checkBalance(Integer userId,Integer accountNumber) throws BMException 
 	{
-		return banking.getBalance(userId, accountNumber);
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountNumber);
+		return banking.getBalance(userId, accountNumber);//swami
 	}
 
 	@Override
-	public Integer selfTransfer(Integer userId,Integer fromAccountNumber, Integer toAccountNumber, Integer amount) throws BMException {
-		
+	public boolean selfTransfer(Integer userId,Integer fromAccountNumber, Integer toAccountNumber, Integer amount) throws BMException 
+	{		
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(fromAccountNumber);
+		Utilities.INST.isNull(toAccountNumber);
+		Utilities.INST.isNull(amount);
 		banking.moneyTransfer(userId,fromAccountNumber, toAccountNumber, amount);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer othersTransfer(Integer userId,Integer fromAccountNumber, Integer toAccountNumber, Integer amount) throws BMException 
+	public boolean othersTransfer(Integer userId,Integer fromAccountNumber, Integer toAccountNumber, Integer amount) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(fromAccountNumber);
+		Utilities.INST.isNull(toAccountNumber);
+		Utilities.INST.isNull(amount);
 		banking.moneyTransfer(userId, fromAccountNumber, toAccountNumber, amount);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer selfDeposit(Integer userId,Integer accountNumber, Integer amount) throws BMException 
+	public boolean selfDeposit(Integer userId,Integer accountNumber, Integer amount) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(amount);
 		banking.selfDeposit(userId, accountNumber, amount);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer othersDeposit(Integer accountNumber, Integer amount) throws BMException {
-		
+	public boolean othersDeposit(Integer accountNumber, Integer amount) throws BMException 
+	{		
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(amount);
 		banking.otherDeposit(accountNumber, amount);
-		return 200;
+		return true;
 	}
 
+
 	@Override
-	public Integer fixedDeposit(Integer accountNumber, Integer amount) throws BMException
+	public UserInfo getProfileInfo(Integer userId) throws BMException 
 	{
-		banking.fixedDeposit(accountNumber, amount);
-		return 200;
-	}
-
-	@Override
-	public UserInfo getProfileInfo(Integer userId) throws BMException {
+		Utilities.INST.isNull(userId);
 		UserInfo userInfo = banking.getUserInfo(userId);
 		return userInfo;
 	}
@@ -118,84 +127,119 @@ public class BankingRouterProvider implements BankingRouter
 	@Override
 	public Map<?, ?> getMyAccountInfo(Integer userId) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
 		return banking.getMyAccountsInfo(userId);
 	}
 
 	@Override
-	public AccountsInfo getMyAccountInfo(Integer userId, Integer accountNumber) throws BMException {
+	public AccountsInfo getMyAccountInfo(Integer userId, Integer accountNumber) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountNumber);
 		AccountsInfo accountInfo = banking.getMyAccount(userId, accountNumber);
 		return accountInfo;
 	}
 
 	@Override
-	public Integer closeAccount(Integer userId,AccountsInfo accountsInfo) throws BMException 
+	public boolean closeAccount(Integer userId,AccountsInfo accountsInfo) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountsInfo);
 		banking.deleteAccount(userId,accountsInfo);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer updateMobileNumber(Integer userId, Integer phoneNumber) throws BMException {
+	public boolean updateMobileNumber(Integer userId, Integer phoneNumber) throws BMException {
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(phoneNumber);
 		banking.changeMobileNumber(userId, phoneNumber);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer updateEmail(Integer userId, String email) throws BMException {
+	public boolean updateEmail(Integer userId, String email) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(email);
+		Utilities.INST.isEmail(email);
 		banking.changeEmail(userId, email);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer updateAadhar(Integer userId, Integer aadharNumber) throws BMException 
+	public boolean updateAadhar(Integer userId, Integer aadharNumber) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(aadharNumber);
 		banking.changeAadhar(userId, aadharNumber);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer updateName(Integer userId, String name) throws BMException 
+	public boolean updateName(Integer userId, String name) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(name);
 		banking.changeName(userId, name);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer updateRole(Integer userId, String role) throws BMException 
+	public boolean updateRole(Integer userId, String role) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(role);
 		banking.changeRole(userId, role);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer updatePassword(Integer userId, String oldPassword, String newPassword) throws BMException {
+	public boolean updatePassword(Integer userId, String oldPassword, String newPassword) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(oldPassword);
+		Utilities.INST.isNull(newPassword);
+		Utilities.INST.isPassword(newPassword);
 		banking.updatePassword(userId, oldPassword, newPassword);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer changeCity(Integer userId, String city) throws BMException 
+	public boolean changeCity(Integer userId, String city) throws BMException 
 	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(city);
 		banking.changeCity(userId, city);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer changeType(Integer accountNumber, String type) throws BMException 
+	public boolean changeType(Integer accountNumber, String type) throws BMException 
 	{
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(type);
 		banking.changeType(accountNumber, type);
-		return 200;
+		return true;
 	}
 
 	@Override
-	public Integer changeAtmPin(Integer userId,Integer accountNumber, Integer oldPin, Integer newPin) throws BMException {
+	public boolean changeAtmPin(Integer userId,Integer accountNumber, Integer oldPin, Integer newPin) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(oldPin);
+		Utilities.INST.isNull(newPin);
 		banking.updateAtmPin(userId, accountNumber, oldPin, newPin);
-		return 200;
+		return true;
 	}
 	@Override
-	public Integer withDraw(Integer userId, Integer accountNumber, Integer amount) throws BMException {
+	public boolean withDraw(Integer userId, Integer accountNumber, Integer amount) throws BMException {
+		Utilities.INST.isNull(userId);
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(amount);
 		banking.withDraw(userId, accountNumber, amount);
-		return 200;
+		return true;
 	}
 	
 } 

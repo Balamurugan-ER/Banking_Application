@@ -15,7 +15,7 @@ public class AccountsInfo
 	private String branch;
 	private String status;
 	private String type;
-	private Integer balance;
+	private Double balance;
 	private int atmPin;
 	public int getUserId() {
 		return userId;
@@ -53,10 +53,10 @@ public class AccountsInfo
 	public void setType(String type) {
 		this.type = type;
 	}
-	public Integer getBalance() {
+	public Double getBalance() {
 		return balance;
 	}
-	public void setBalance(Integer balance) 
+	public void setBalance(Double balance) 
 	{
 		this.balance = balance;
 	}

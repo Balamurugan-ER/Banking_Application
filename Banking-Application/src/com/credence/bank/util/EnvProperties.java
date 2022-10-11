@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.credence.bank.banking;
+package com.credence.bank.util;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

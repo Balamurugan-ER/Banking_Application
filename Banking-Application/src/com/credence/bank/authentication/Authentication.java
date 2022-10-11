@@ -5,6 +5,7 @@ package com.credence.bank.authentication;
 
 import java.util.HashMap;
 
+import com.credence.bank.banking.Storage;
 import com.credence.bank.util.BMException;
 import com.credence.bank.util.Utilities;
 
@@ -14,21 +15,13 @@ import com.credence.bank.util.Utilities;
  */
 public class Authentication 
 {
-	private static HashMap<String,String> auth = new HashMap<String,String>();
-	public static void addDumpUsers()
+	public static boolean login(Integer userId,String email,String password) throws BMException
 	{
-		auth.put("bala", "123");
-		auth.put("test", "123");
-		auth.put("Jack", "Jack@123");
-		auth.put("admin", "Admin@123");
-	}
-	public static int login(String username,String password) throws BMException
-	{
+		Utilities.INST.isNull(email);
 		Utilities.INST.isNull(password);
-		if(password.equals(auth.get(username)))
-		{
-			return 200;
-		}
-		return 400;
+		Utilities.INST.isEmail(email);
+		Utilities.INST.isPassword(password);
+		Storage banking = Utilities.INST.getStorage();
+		return banking.login(userId, email, password);
 	}
 }

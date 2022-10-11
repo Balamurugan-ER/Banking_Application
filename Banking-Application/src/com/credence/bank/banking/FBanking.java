@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.credence.bank.info.AccountsInfo;
+import com.credence.bank.info.TransactionInfo;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.util.BMException;
 import com.credence.bank.util.Utilities;
@@ -29,9 +30,11 @@ public enum FBanking implements Storage
 	private Map<Integer,UserInfo> userDetails = new HashMap<>();
 	private Map<Integer,AccountsInfo> accountDetails = new HashMap<>();
 	private Map<Integer, Map<Integer, AccountsInfo>> customerInfo = new HashMap<>();
+	private Map<Integer,TransactionInfo> transactions = new HashMap<>();
 	private String userDetailSer = "FBankingUserDetails.ser";
 	private String accountDetailSer = "FBankingAccountDetails.ser";
 	private String customerInfoSer = "FBankingCustomerInfo.ser";
+	private String transactionInfoSer = "FBankingTransactionInfo.ser";
 	@Override
 	public void setup() throws BMException
 	{
@@ -79,6 +82,7 @@ public enum FBanking implements Storage
 		writeData(accountDetailSer,accountDetails);
 		writeData(userDetailSer,userDetails);
 		writeData(customerInfoSer,customerInfo);
+		writeData(transactionInfoSer, transactions);
 	}
 	@SuppressWarnings("unchecked")
 	public void load() throws BMException
@@ -86,6 +90,7 @@ public enum FBanking implements Storage
 		accountDetails = (Map<Integer, AccountsInfo>) loadData(accountDetailSer);
 		userDetails = (Map<Integer, UserInfo>) loadData(userDetailSer);
 		customerInfo = (Map<Integer, Map<Integer, AccountsInfo>>) loadData(customerInfoSer);
+		transactions = (Map<Integer, TransactionInfo>) loadData(transactionInfoSer);
 	}
 	@Override
 	public void dumpUserProfileData(List<UserInfo> userInfo) throws BMException 
@@ -142,7 +147,7 @@ public enum FBanking implements Storage
 	}
 
 	@Override
-	public Integer getBalance(Integer userId, Integer accountNumber) throws BMException 
+	public Double getBalance(Integer userId, Integer accountNumber) throws BMException 
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountNumber);
@@ -152,39 +157,39 @@ public enum FBanking implements Storage
 	}
 
 	@Override
-	public void selfDeposit(Integer userId, Integer accountNumber, Integer amount) throws BMException 
+	public void selfDeposit(Integer userId, Integer accountNumber, Double amount) throws BMException 
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountNumber);
 		Utilities.INST.isNull(amount);
 		AccountsInfo myAccount = getMyAccount(userId, accountNumber);
 		Utilities.INST.isNull(myAccount);
-		Integer currentBalance = myAccount.getBalance();
+		Double currentBalance = myAccount.getBalance();
 		currentBalance += amount;
 		myAccount.setBalance(currentBalance);
 	}
 
 	@Override
-	public void otherDeposit(Integer accountNumber, Integer amount) throws BMException 
+	public void otherDeposit(Integer accountNumber, Double amount) throws BMException 
 	{
 		Utilities.INST.isNull(accountNumber);
 		Utilities.INST.isNull(amount);
 		AccountsInfo receiverAccount = accountDetails.get(accountNumber);
 		Utilities.INST.isNull(receiverAccount);
-		Integer currentBalance = receiverAccount.getBalance();
+		Double currentBalance = receiverAccount.getBalance();
 		currentBalance += amount;
 		receiverAccount.setBalance(currentBalance);
 	}
 
 	@Override
-	public void withDraw(Integer userId, Integer accountNumber, Integer amount) throws BMException 
+	public void withDraw(Integer userId, Integer accountNumber, Double amount) throws BMException 
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountNumber);
 		Utilities.INST.isNull(amount);
 		AccountsInfo myAccount = getMyAccount(userId,accountNumber);
 		Utilities.INST.isNull(myAccount);
-		Integer currentBalance = myAccount.getBalance();
+		Double currentBalance = myAccount.getBalance();
 		if(currentBalance < amount)
 		{
 			throw new BMException("Insufficient Balance");
@@ -230,7 +235,7 @@ public enum FBanking implements Storage
 	}
 
 	@Override
-	public void moneyTransfer(Integer userId, Integer senderAccountNo, Integer receiverAccountNo, Integer amount) throws BMException 
+	public void moneyTransfer(Integer userId, Integer senderAccountNo, Integer receiverAccountNo, Double amount) throws BMException 
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(senderAccountNo);
@@ -240,13 +245,13 @@ public enum FBanking implements Storage
 		AccountsInfo receiverAccount = accountDetails.get(receiverAccountNo);
 		Utilities.INST.isNull(myAccount);
 		Utilities.INST.isNull(receiverAccount);
-		Integer senderCurrentBalance = myAccount.getBalance();
+		Double senderCurrentBalance = myAccount.getBalance();
 		if(senderCurrentBalance < amount)
 		{
 			throw new BMException("Insufficient Balance to Make this Transacation");
 		}
 		senderCurrentBalance -= amount;
-		Integer receiverCurrentBalance = receiverAccount.getBalance();
+		Double receiverCurrentBalance = receiverAccount.getBalance();
 		receiverCurrentBalance += amount;
 	}
 
@@ -345,5 +350,30 @@ public enum FBanking implements Storage
 		Utilities.INST.isNull(accountsInfo);
 		accountsInfo.setStatus("Inactive");
 	}
+	@Override
+	public void addTransaction(TransactionInfo transactionInfo) throws BMException 
+	{
+		Utilities.INST.isNull(transactionInfo);
+		transactions.put(transactionInfo.getTransactionId(), transactionInfo);
+	}
+	@Override
+	public TransactionInfo getTransaction(Integer transactionId) throws BMException 
+	{
+		Utilities.INST.isNull(transactionId);
+		return transactions.get(transactionId);
+	}
+	@Override
+	public Map<?, ?> getAllTransaction() 
+	{
+		return transactions;
+	}
+	@Override
+	public void grantApproval(Integer transactionId) throws BMException 
+	{
+		Utilities.INST.isNull(transactionId);
+		TransactionInfo thisTransaction = transactions.get(transactionId);
+		thisTransaction.setStatus("Approved");
+	}
+	
 
 }

@@ -3,10 +3,13 @@
  */
 package com.credence.bank.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.regex.Pattern;
+
+import com.credence.bank.banking.Storage;
 
 /**
  * @author Balamurugan
@@ -15,6 +18,7 @@ import java.util.regex.Pattern;
 public enum Utilities 
 {
 	INST;
+	Storage banking;
 	public void isNull(Object obj) throws BMException
 	{
 		if(obj == null)
@@ -32,69 +36,25 @@ public enum Utilities
 		String passwordPattern = ".{8,25}";
 		return Pattern.matches(passwordPattern, password);
 	}
-	public void check(String className) throws BMException
-	{		
-		int passedCount=0,failedCount=0;
+	public Storage getStorage() throws BMException
+	{
+		String className = EnvProperties.INST.envProps.getProperty("storage");
 		try 
-		{
-//			Class classObject = Class.forName("com.bm.framework.String.BeginnerString");
-			Class<?> classObject = Class.forName(className);
-			Object obj = classObject.newInstance();
-			Method[] methodObject = classObject.getDeclaredMethods();
-
-			for(Method methodIterator : methodObject)
+		{	
+			Class<?> classObj = Class.forName(className);
+			Constructor<?>[] constObj = classObj.getDeclaredConstructors();
+			for(Constructor con : constObj)
 			{
-				Parameter[] parameter = methodIterator.getParameters();
-				Object[] paramValues = new Object[parameter.length];
-
-				int i = 0;
-				System.out.println(methodIterator.getName());
-				for(Parameter param : parameter)
-				{
-					if(param.getType().isPrimitive())
-					{
-						if(param.getType().toString().equals("boolean"))
-						{
-							paramValues[i++] = false;
-						}
-						if(param.getType().toString().equals("int"))
-						{
-							paramValues[i++] = 0;
-						}
-						if(param.getType().toString().equals("char"))
-						{
-							paramValues[i++]='a';
-						}
-					}
-					else
-					{
-						paramValues[i++] = null;
-					}
-				}			
-				methodIterator.setAccessible(true);
-				try {
-					methodIterator.invoke(obj,paramValues);
-				} 
-				catch (InvocationTargetException e) {
-					if(e.getCause() instanceof BMException)
-					{
-						passedCount++;
-						System.out.println("passed "+methodIterator.getName());
-					}
-					else
-					{
-						failedCount++;
-						System.out.println("failed "+methodIterator.getName());
-					}
-				}
+				banking = (Storage) con.newInstance(constObj);
 			}
 		}
-		catch(Exception e)
+		catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+				IllegalArgumentException | InvocationTargetException e ) 
 		{
-			e.printStackTrace();
+			throw new BMException("Implementation Class not found",e);
 		}
-		System.out.println(passedCount+" Cases Passed");
-		System.out.println(failedCount+" Failed Cases");
+		
+		return banking;
 	}
 
 }

@@ -3,35 +3,45 @@
  */
 package com.credence.bank.info;
 
+import java.sql.Timestamp;
+
 /**
  * @author Balamurugan
  *
  */
 public class TransactionInfo 
 {
-	private int tid;
-	private String from;
-	private String to;
+	private Integer userId;
+	private Integer transactionId;
+	private Integer senderAccountNumber;
+	private Integer receiverAccountNumber;
 	private String type;
-	private int amount;
+	private double amount;
+	private String status;
 	private long time;
-	public int getTid() {
-		return tid;
+	public Integer getUserId() {
+		return userId;
 	}
-	public void setTid(int tid) {
-		this.tid = tid;
+	public void setUserId(Integer userId) {
+		this.userId = userId;
 	}
-	public String getFrom() {
-		return from;
+	public Integer getTransactionId() {
+		return transactionId;
 	}
-	public void setFrom(String from) {
-		this.from = from;
+	public void setTransactionId(Integer transactionId) {
+		this.transactionId = transactionId;
 	}
-	public String getTo() {
-		return to;
+	public Integer getSenderAccountNumber() {
+		return senderAccountNumber;
 	}
-	public void setTo(String to) {
-		this.to = to;
+	public void setSenderAccountNumber(Integer senderAccountNumber) {
+		this.senderAccountNumber = senderAccountNumber;
+	}
+	public Integer getReceiverAccountNumber() {
+		return receiverAccountNumber;
+	}
+	public void setReceiverAccountNumber(Integer receiverAccountNumber) {
+		this.receiverAccountNumber = receiverAccountNumber;
 	}
 	public String getType() {
 		return type;
@@ -39,17 +49,22 @@ public class TransactionInfo
 	public void setType(String type) {
 		this.type = type;
 	}
-	public int getAmount() {
+	public double getAmount() {
 		return amount;
 	}
-	public void setAmount(int amount) {
+	public void setAmount(double amount) {
 		this.amount = amount;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 	public long getTime() {
 		return time;
 	}
 	public void setTime(long time) {
 		this.time = time;
-	} 
-	
+	}	
 }

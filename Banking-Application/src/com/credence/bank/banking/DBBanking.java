@@ -12,8 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.credence.bank.info.AccountsInfo;
+import com.credence.bank.info.TransactionInfo;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.util.BMException;
+import com.credence.bank.util.EnvProperties;
 import com.credence.bank.util.Utilities;
 
 /**
@@ -126,7 +128,7 @@ public enum DBBanking implements Storage
 					accountsInfo.setBranch(result.getString(4));
 					accountsInfo.setType(result.getString(5));
 					accountsInfo.setStatus(result.getString(6));
-					accountsInfo.setBalance(result.getInt(7));
+					accountsInfo.setBalance(result.getDouble(7));
 					accountsInfo.setAtmPin(result.getInt(8));
 				}
 			}
@@ -143,12 +145,12 @@ public enum DBBanking implements Storage
 	}
 
 	@Override
-	public Integer getBalance(Integer userId, Integer accountNumber) throws BMException {
+	public Double getBalance(Integer userId, Integer accountNumber) throws BMException {
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountNumber);
 		// TODO getBalance
 		String query = "SELECT Balance FROM Accounts WHERE UserId = ? AND AccountNumber = ?;";
-		Integer balance = null;
+		Double balance = null;
 		Connection connection = getConnection();
 		try(PreparedStatement prepareStatement = connection.prepareStatement(query);
 				ResultSet result = prepareStatement.getResultSet()) 
@@ -159,7 +161,7 @@ public enum DBBanking implements Storage
 			if(response)
 			{
 				result.next();
-				balance = result.getInt(1);
+				balance = result.getDouble(1);
 			}
 		}
 		catch (SQLException e) 
@@ -174,7 +176,7 @@ public enum DBBanking implements Storage
 	}
 
 	@Override
-	public void selfDeposit(Integer userId, Integer accountNumber, Integer amount) throws BMException 
+	public void selfDeposit(Integer userId, Integer accountNumber, Double amount) throws BMException 
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountNumber);
@@ -185,7 +187,7 @@ public enum DBBanking implements Storage
 		try (PreparedStatement prepareStatement = connection.prepareStatement(query))
 		{
 
-			prepareStatement.setInt(1, amount);
+			prepareStatement.setDouble(1, amount);
 			prepareStatement.setInt(2, userId);
 			prepareStatement.setInt(3, accountNumber);
 			prepareStatement.execute();
@@ -201,7 +203,7 @@ public enum DBBanking implements Storage
 	}
 
 	@Override
-	public void otherDeposit(Integer accountNumber, Integer amount) throws BMException 
+	public void otherDeposit(Integer accountNumber, Double amount) throws BMException 
 	{
 		Utilities.INST.isNull(accountNumber);
 		Utilities.INST.isNull(amount);
@@ -209,7 +211,7 @@ public enum DBBanking implements Storage
 		Connection connection = getConnection();
 		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
 		{
-			prepareStatement.setInt(1, amount);
+			prepareStatement.setDouble(1, amount);
 			prepareStatement.setInt(2, accountNumber);
 			prepareStatement.execute();
 		} 
@@ -224,7 +226,7 @@ public enum DBBanking implements Storage
 	}
 
 	@Override
-	public void withDraw(Integer userId, Integer accountNumber, Integer amount) throws BMException 
+	public void withDraw(Integer userId, Integer accountNumber, Double amount) throws BMException 
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountNumber);
@@ -234,10 +236,10 @@ public enum DBBanking implements Storage
 		try (PreparedStatement prepareStatement = connection.prepareStatement(query))
 		{
 
-			prepareStatement.setInt(1, amount);
+			prepareStatement.setDouble(1, amount);
 			prepareStatement.setInt(2, userId);
 			prepareStatement.setInt(3, accountNumber);
-			prepareStatement.setInt(4, amount);
+			prepareStatement.setDouble(4, amount);
 			prepareStatement.execute();
 		}
 		catch (SQLException e) 
@@ -313,7 +315,7 @@ public enum DBBanking implements Storage
 	}
 
 	@Override
-	public void moneyTransfer(Integer userId, Integer senderAccountNo, Integer receiverAccountNo, Integer amount) throws BMException 
+	public void moneyTransfer(Integer userId, Integer senderAccountNo, Integer receiverAccountNo, Double amount) throws BMException 
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(senderAccountNo);
@@ -325,11 +327,11 @@ public enum DBBanking implements Storage
 		try(PreparedStatement withDrawStatement = connection.prepareStatement(withDrawQuery);
 				PreparedStatement creditStatement = connection.prepareStatement(creditQuery)) 
 		{
-			withDrawStatement.setInt(1,amount);
+			withDrawStatement.setDouble(1,amount);
 			withDrawStatement.setInt(2,senderAccountNo);
-			withDrawStatement.setInt(3,amount);
+			withDrawStatement.setDouble(3,amount);
 			withDrawStatement.execute();
-			creditStatement.setInt(1,amount);
+			creditStatement.setDouble(1,amount);
 			creditStatement.setInt(2,receiverAccountNo);
 			creditStatement.execute();
 		}
@@ -419,7 +421,7 @@ public enum DBBanking implements Storage
 					accountsInfo.setBranch(result.getString(4));
 					accountsInfo.setType(result.getString(5));
 					accountsInfo.setStatus(result.getString(6));
-					accountsInfo.setBalance(result.getInt(7));
+					accountsInfo.setBalance(result.getDouble(7));
 					accountsInfo.setAtmPin(result.getInt(9));
 					myAccounts.put((int) accountsInfo.getAccountNumber(), accountsInfo);
 				}
@@ -483,7 +485,7 @@ public enum DBBanking implements Storage
 			preparedStatement.setString(4, accountsInfo.getBranch());
 			preparedStatement.setString(5, accountsInfo.getType());
 			preparedStatement.setString(6, accountsInfo.getStatus());
-			preparedStatement.setInt(7, accountsInfo.getBalance());
+			preparedStatement.setDouble(7, accountsInfo.getBalance());
 			preparedStatement.setInt(8, accountsInfo.getAtmPin());
 		}
 		catch (SQLException e) 
@@ -504,7 +506,7 @@ public enum DBBanking implements Storage
 		Connection connection = getConnection();
 		try (PreparedStatement preparedStatement = connection.prepareStatement(query))
 		{
-			
+
 			preparedStatement.setLong(1, accountsInfo.getAccountNumber());
 			preparedStatement.setInt(2, accountsInfo.getUserId());
 			preparedStatement.execute();
@@ -521,11 +523,12 @@ public enum DBBanking implements Storage
 	@Override
 	public void dumpUserProfileData(List<UserInfo> userInfo) throws BMException 
 	{
+		Utilities.INST.isNull(userInfo);
 		String query = "INSERT INTO Info VALUES(?,?,?,?,?,?,?,?)";
 		Connection connection = getConnection();
 		try(PreparedStatement dumpUserInfoQuery = connection.prepareStatement(query)) 
 		{
-			
+
 			for(UserInfo user: userInfo)
 			{
 				dumpUserInfoQuery.setInt(1, user.getUserId());
@@ -552,11 +555,12 @@ public enum DBBanking implements Storage
 	@Override
 	public void dumpAccountsData(List<AccountsInfo> accountsInfo) throws BMException 
 	{
+		Utilities.INST.isNull(accountsInfo);
 		String query = "INSERT INTO Accounts VALUES(?,?,?,?,?,?,?,?,?)";
 		Connection connection = getConnection();
 		try(PreparedStatement dumpAccountsInfoQuery = connection.prepareStatement(query)) 
 		{
-			
+
 			for(AccountsInfo account: accountsInfo)
 			{
 				dumpAccountsInfoQuery.setInt(1, account.getUserId());
@@ -565,7 +569,7 @@ public enum DBBanking implements Storage
 				dumpAccountsInfoQuery.setString(4, account.getBranch());
 				dumpAccountsInfoQuery.setString(5, account.getType());
 				dumpAccountsInfoQuery.setString(6, account.getStatus());
-				dumpAccountsInfoQuery.setLong(7, account.getBalance());
+				dumpAccountsInfoQuery.setDouble(7, account.getBalance());
 				dumpAccountsInfoQuery.setInt(8, account.getAtmPin());
 				dumpAccountsInfoQuery.addBatch();
 			}
@@ -579,7 +583,124 @@ public enum DBBanking implements Storage
 		{
 			closeConnection(connection);
 		}
-		
+
 	}
-	
+	@Override
+	public void addTransaction(TransactionInfo transactionInfo) throws BMException 
+	{
+		Utilities.INST.isNull(transactionInfo);
+		String addTransactionQuery = "INSERT INTO Transaction VALUES(?,?,?,?,?,?,?)";
+		Connection connection = getConnection();
+		try(PreparedStatement addTransaction = connection.prepareStatement(addTransactionQuery))
+		{
+			addTransaction.setInt(1, transactionInfo.getTransactionId());
+			addTransaction.setInt(2, transactionInfo.getUserId());
+			addTransaction.setLong(3, transactionInfo.getSenderAccountNumber());
+			addTransaction.setLong(4, transactionInfo.getReceiverAccountNumber());
+			addTransaction.setFloat(5, (float) transactionInfo.getAmount());
+			addTransaction.setLong(6, transactionInfo.getTime());
+			addTransaction.setString(7, transactionInfo.getStatus());
+			addTransaction.execute();
+		} 
+		catch (SQLException e)
+		{
+			throw new BMException("Failed To add Transaction",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+
+	}
+	@Override
+	public TransactionInfo getTransaction(Integer transactionId) throws BMException 
+	{
+		Utilities.INST.isNull(transactionId);
+		String getTransactionQuery = "SELECT * FROM Transaction WHERE TransactionId = ? ;";
+		Connection connection = getConnection();
+		TransactionInfo myTransaction = new TransactionInfo();
+		try(PreparedStatement getTransaction = connection.prepareStatement(getTransactionQuery);
+				ResultSet result = getTransaction.getResultSet())
+		{
+			getTransaction.setInt(1, transactionId);
+			boolean rescode = getTransaction.execute();
+			if(rescode)
+			{
+				result.next();
+				myTransaction.setTransactionId(result.getInt(1));
+				myTransaction.setUserId(result.getInt(2));
+				myTransaction.setSenderAccountNumber(result.getInt(3));
+				myTransaction.setReceiverAccountNumber(result.getInt(4));
+				myTransaction.setAmount(result.getDouble(5));
+				myTransaction.setTime(result.getLong(6));
+				myTransaction.setStatus(result.getString(7));
+			}
+		}
+		catch (SQLException e) 
+		{
+			throw new BMException("Failed To get Transaction",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		return myTransaction;
+	}
+	@Override
+	public Map<?, ?> getAllTransaction() throws BMException 
+	{
+		String getAllTransactionQuery = "SELECT * FROM Transaction";
+		Map<Integer,TransactionInfo> transactions = new HashMap<>();
+		Connection connection = getConnection();
+		try(PreparedStatement getAllTransaction = connection.prepareStatement(getAllTransactionQuery);
+				ResultSet result = getAllTransaction.getResultSet())
+		{
+			boolean rescode = getAllTransaction.execute();
+			if(rescode)
+			{
+				while(result.next())
+				{
+					TransactionInfo transactionInfo = new TransactionInfo();
+					transactionInfo.setTransactionId(result.getInt(1));
+					transactionInfo.setUserId(result.getInt(2));
+					transactionInfo.setSenderAccountNumber(result.getInt(3));
+					transactionInfo.setReceiverAccountNumber(result.getInt(4));
+					transactionInfo.setAmount(result.getDouble(5));
+					transactionInfo.setTime(result.getLong(6));
+					transactionInfo.setStatus(result.getString(7));
+					transactions.put(transactionInfo.getTransactionId(), transactionInfo);
+				}
+			}
+		}
+		catch (SQLException e) 
+		{
+			throw new BMException("Failed To Approve Transaction status",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		return transactions;
+	}
+	@Override
+	public void grantApproval(Integer transactionId) throws BMException 
+	{
+		Utilities.INST.isNull(transactionId);
+		String grantApproveQuery = "UPDATE Transaction SET Status= \"Approved\" WHERE TransactionId = ? ;";
+		Connection connection = getConnection();
+		try(PreparedStatement grantApprove = connection.prepareStatement(grantApproveQuery))
+		{
+			grantApprove.setInt(1, transactionId);
+			grantApprove.execute();
+		}
+		catch (SQLException e) 
+		{
+			throw new BMException("Failed To Approve Transaction status",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+	}
+
 }

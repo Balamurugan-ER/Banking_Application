@@ -17,6 +17,7 @@ import com.credence.bank.util.Utilities;
 public class TransactionRouter implements Transaction
 {
 	
+	
 	private static Storage banking;
 	
 	private static Storage getStorage() throws BMException 
@@ -90,19 +91,19 @@ public class TransactionRouter implements Transaction
 		int senderAccountNumber = thisTransaction.getSenderAccountNumber();
 		if(status.equals("Approved"))
 		{
-			if(type.equals("selfDeposit"))//swami enum
+			if(type.equals(TransactionType.SELFDEPOSIT.getType()))
 			{
 				banking.selfDeposit(userId, receiverAccountNumber, amount);
 			}
-			if(type.equals("otherDeposit"))
+			if(type.equals(TransactionType.OTHERDEPOSIT.getType()))
 			{
 				banking.otherDeposit(receiverAccountNumber, amount);
 			}
-			if(type.equals("withDraw"))
+			if(type.equals(TransactionType.WITHDRAW.getType()))
 			{
 				banking.withDraw(userId, receiverAccountNumber, amount);
 			}
-			if(type.equals("moneyTransfer"))
+			if(type.equals(TransactionType.MONEYTRANSFER.getType()))
 			{
 				banking.moneyTransfer(userId, senderAccountNumber, receiverAccountNumber, amount);
 			}

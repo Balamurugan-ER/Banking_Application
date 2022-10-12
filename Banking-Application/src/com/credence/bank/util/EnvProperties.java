@@ -20,12 +20,12 @@ public enum EnvProperties
 	INST;
 	public Properties envProps = new Properties();
 	private String propsName = "EnvProps.properties";
-	private void writingProps()
+	public void writingProps()
 	{
 		envProps.setProperty("url", "jdbc:mysql://localhost:3306/incubationDB");
 		envProps.setProperty("username", "root");
 		envProps.setProperty("password", "Root@123");
-		envProps.setProperty("storage", "BankingDB");
+		envProps.setProperty("storage", "com.credence.bank.banking.DBBanking");
 		try 
 		{
 			OutputStream writeProps = new FileOutputStream(propsName);
@@ -40,7 +40,7 @@ public enum EnvProperties
 			e.printStackTrace();
 		}
 	}
-	private void loadProps()
+	public void loadProps()
 	{
 		try 
 		{

@@ -28,16 +28,19 @@ public enum Utilities
 	}
 	public boolean isEmail(String email) throws BMException
 	{
+		isNull(email);
 		String emailPattern = "^[a-zA-Z0-9]*@{1}[a-zA-Z0-9]*[\\.][\\.a-zA-Z0-9]+";
 		return Pattern.matches(emailPattern, email);
 	}
 	public boolean isPassword(String password) throws BMException
 	{
+		isNull(password);
 		String passwordPattern = ".{8,25}";
 		return Pattern.matches(passwordPattern, password);
 	}
 	public Storage getStorage() throws BMException
 	{
+		EnvProperties.INST.writingProps();
 		String className = EnvProperties.INST.envProps.getProperty("storage");
 		try 
 		{	
@@ -45,12 +48,14 @@ public enum Utilities
 			Constructor<?>[] constObj = classObj.getDeclaredConstructors();
 			for(Constructor con : constObj)
 			{
-				banking = (Storage) con.newInstance(constObj);
+				con.setAccessible(true);
+				banking = (Storage) con.newInstance();
 			}
 		}
 		catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
 				IllegalArgumentException | InvocationTargetException e ) 
 		{
+			e.printStackTrace();
 			throw new BMException("Implementation Class not found",e);
 		}
 		

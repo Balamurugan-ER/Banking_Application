@@ -3,9 +3,8 @@
  */
 package com.credence.bank.authentication;
 
-import java.util.HashMap;
-
 import com.credence.bank.banking.Storage;
+import com.credence.bank.info.UserInfo;
 import com.credence.bank.util.BMException;
 import com.credence.bank.util.Utilities;
 
@@ -15,13 +14,31 @@ import com.credence.bank.util.Utilities;
  */
 public class Authentication 
 {
-	public static boolean login(Integer userId,String email,String password) throws BMException
+	public boolean login(Integer userId,String email, String password) throws BMException 
 	{
-		Utilities.INST.isNull(email);
-		Utilities.INST.isNull(password);
-		Utilities.INST.isEmail(email);
-		Utilities.INST.isPassword(password);
+		Utilities.INST.isNull(userId);
+		boolean emailVerification = Utilities.INST.isEmail(email);
+		if(!emailVerification)
+		{
+			throw new BMException("Invalid Email");
+		}
+		boolean passwordVerification = Utilities.INST.isPassword(password);
+		if(!passwordVerification)
+		{
+			throw new BMException("Invalid password");
+		}
 		Storage banking = Utilities.INST.getStorage();
-		return banking.login(userId, email, password);
+		UserInfo user = banking.getUserInfo(userId);
+		if(user == null)
+		{
+			throw new BMException("User not found");
+		}
+		String orgEmail = user.getEmail();
+		String orgPassword = user.getPassword();
+		if(email.equals(orgEmail) && password.equals(orgPassword))
+		{
+			return true;
+		}
+		return false;
 	}
 }

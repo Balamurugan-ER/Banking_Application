@@ -24,9 +24,8 @@ import com.credence.bank.util.Utilities;
  *
  */
 
-public enum FBanking implements Storage
+public class FBanking implements Storage
 {
-	INST;
 	private Map<Integer,UserInfo> userDetails = new HashMap<>();
 	private Map<Integer,AccountsInfo> accountDetails = new HashMap<>();
 	private Map<Integer, Map<Integer, AccountsInfo>> customerInfo = new HashMap<>();

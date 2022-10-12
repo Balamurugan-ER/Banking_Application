@@ -18,6 +18,7 @@ public class UserInfo
 	private String city;
 	private String role;
 	private String status;
+	private String adminAccess;
 	public int getUserId() {
 		return userId;
 	}
@@ -69,13 +70,21 @@ public class UserInfo
 	public String getStatus() {
 		return status;
 	}
-	public void setStatus(String status) {
+	public void setStatus(String status) 
+	{
 		this.status = status;
+	}
+	public String getAdminAccess() 
+	{
+		return adminAccess;
+	}
+	public void setAdminAccess(String adminAccess) {
+		this.adminAccess = adminAccess;
 	}
 	@Override
 	public String toString()
 	{
-		String row = "{"+getUserId()+","+getName()+","+getEmail()+","+getPhone()+","+getRole()+","+getAadhar()+","+getCity()+"}";
+		String row = "{"+getUserId()+","+getName()+","+getEmail()+","+getPhone()+","+getRole()+","+getAadhar()+","+getCity()+","+getAdminAccess()+"}";
 		return row;
 	}
 	

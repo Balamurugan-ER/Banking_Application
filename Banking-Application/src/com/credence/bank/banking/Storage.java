@@ -138,25 +138,5 @@ public interface Storage
 	 */
 	public void grantApproval(Integer transactionId) throws BMException;
 	
-	default
-	public boolean login(Integer userId,String email, String password) throws BMException 
-	{
-		Utilities.INST.isNull(email);
-		Utilities.INST.isNull(password);
-		Utilities.INST.isEmail(email);
-		Utilities.INST.isPassword(password);
-		UserInfo user = getUserInfo(userId);
-		if(user == null)
-		{
-			throw new BMException("User not found");
-		}
-		String orgEmail = user.getEmail();
-		String orgPassword = user.getPassword();
-		if(email.equals(orgEmail) && password.equals(orgPassword))
-		{
-			return true;
-		}
-		return false;
-	}
 	
 }

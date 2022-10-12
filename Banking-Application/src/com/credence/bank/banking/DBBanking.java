@@ -22,9 +22,8 @@ import com.credence.bank.util.Utilities;
  * @author Balamurugan
  *
  */
-public enum DBBanking implements Storage 
+public class DBBanking implements Storage 
 {
-	INST;
 	@Override
 	public void setup() {}
 	@Override
@@ -41,6 +40,7 @@ public enum DBBanking implements Storage
 		} 
 		catch (SQLException e) 
 		{
+			e.printStackTrace();
 			throw new BMException("connection failed",e);
 		}
 		return connection;
@@ -64,8 +64,7 @@ public enum DBBanking implements Storage
 		String query = "SELECT * FROM Info WHERE UserId=? ;";
 		UserInfo userInfo = new UserInfo();
 		Connection connection = getConnection();
-		try(PreparedStatement prepareStatement = connection.prepareStatement(query);
-				ResultSet result = prepareStatement.getResultSet()) 
+		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
 		{
 			prepareStatement.setInt(1, userId);
 			boolean response = prepareStatement.execute();
@@ -75,6 +74,7 @@ public enum DBBanking implements Storage
 			}
 			if(response)
 			{
+				ResultSet result = prepareStatement.getResultSet();
 				while(result.next())
 				{
 					userInfo.setUserId(result.getInt(1));
@@ -85,6 +85,8 @@ public enum DBBanking implements Storage
 					userInfo.setAadhar(result.getLong(6));
 					userInfo.setRole(result.getString(7));
 					userInfo.setCity(result.getString(8));
+					userInfo.setStatus(result.getString(9));
+					userInfo.setAdminAccess(result.getString(10));
 				}
 			}
 		} 
@@ -441,7 +443,7 @@ public enum DBBanking implements Storage
 	public void createUser(UserInfo userInfo) throws BMException 
 	{
 		Utilities.INST.isNull(userInfo);
-		String query = "INSERT INTO Info VALUES(?,?,?,?,?,?,?,?) ;";
+		String query = "INSERT INTO Info VALUES(?,?,?,?,?,?,?,?,?,?) ;";
 		Connection connection = getConnection();
 		try(PreparedStatement preparedStatement = connection.prepareStatement(query)) 
 		{
@@ -453,6 +455,8 @@ public enum DBBanking implements Storage
 			preparedStatement.setLong(6, userInfo.getAadhar());
 			preparedStatement.setString(7, userInfo.getRole());
 			preparedStatement.setString(8, userInfo.getCity());
+			preparedStatement.setString(9, userInfo.getStatus());
+			preparedStatement.setString(10, userInfo.getAdminAccess());
 			preparedStatement.execute();
 		}
 		catch (SQLException e) 
@@ -524,7 +528,7 @@ public enum DBBanking implements Storage
 	public void dumpUserProfileData(List<UserInfo> userInfo) throws BMException 
 	{
 		Utilities.INST.isNull(userInfo);
-		String query = "INSERT INTO Info VALUES(?,?,?,?,?,?,?,?)";
+		String query = "INSERT INTO Info VALUES(?,?,?,?,?,?,?,?,?,?)";
 		Connection connection = getConnection();
 		try(PreparedStatement dumpUserInfoQuery = connection.prepareStatement(query)) 
 		{
@@ -539,6 +543,8 @@ public enum DBBanking implements Storage
 				dumpUserInfoQuery.setLong(6, user.getAadhar());
 				dumpUserInfoQuery.setString(7, user.getRole());
 				dumpUserInfoQuery.setString(8, user.getCity());
+				dumpUserInfoQuery.setString(9, user.getStatus());
+				dumpUserInfoQuery.setString(10, user.getAdminAccess());
 				dumpUserInfoQuery.addBatch();
 			}
 			dumpUserInfoQuery.executeBatch();

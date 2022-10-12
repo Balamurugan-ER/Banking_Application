@@ -14,6 +14,23 @@ import com.credence.bank.util.BMException;
  */
 public interface Transaction 
 {
+	enum TransactionType
+	{
+		WITHDRAW("withDraw"),
+		SELFDEPOSIT("selfDeposit"),
+		OTHERDEPOSIT("otherDeposit"),
+		MONEYTRANSFER("moneyTransfer");
+		TransactionType(String type) 
+		{
+			this.transactionType = type;
+		}
+		private String transactionType;
+		String getType()
+		{
+			return this.transactionType;
+		}
+		
+	}
 	/**
 	 * 
 	 * @param transactionInfo

@@ -35,7 +35,8 @@ public class Authentication
 		}
 		String orgEmail = user.getEmail();
 		String orgPassword = user.getPassword();
-		if(email.equals(orgEmail) && password.equals(orgPassword))
+		int orgUserId = user.getUserId();
+		if(email.equals(orgEmail) && password.equals(orgPassword) && userId.equals(orgUserId))
 		{
 			return true;
 		}

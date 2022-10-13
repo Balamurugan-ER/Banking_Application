@@ -15,10 +15,10 @@ public class TransactionInfo
 	private Integer transactionId;
 	private Integer senderAccountNumber;
 	private Integer receiverAccountNumber;
-	private String type;
 	private double amount;
 	private String status;
 	private long time;
+	private String type;
 	public Integer getUserId() {
 		return userId;
 	}
@@ -43,12 +43,6 @@ public class TransactionInfo
 	public void setReceiverAccountNumber(Integer receiverAccountNumber) {
 		this.receiverAccountNumber = receiverAccountNumber;
 	}
-	public String getType() {
-		return type;
-	}
-	public void setType(String type) {
-		this.type = type;
-	}
 	public double getAmount() {
 		return amount;
 	}
@@ -66,5 +60,23 @@ public class TransactionInfo
 	}
 	public void setTime(long time) {
 		this.time = time;
-	}	
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public String toString()
+	{
+		return "{\n"
+				+ "TransactionId	: "+ getTransactionId()+","
+				+ "SenderAccount 	: "+getSenderAccountNumber()+",\n"
+				+ "ReceiverAccount	: "+getReceiverAccountNumber()+",\n"
+				+ "Transaction Status : "+getStatus()+",\n"
+				+ "Transaction Type	: "+getType()+",\n"
+				+ "Amount			:"+getAmount()+",\n"
+				+ "Time	:"+getTime()			
+				+ "\n}";
+	}
 }

@@ -74,19 +74,21 @@ public class DBBanking implements Storage
 			}
 			if(response)
 			{
-				ResultSet result = prepareStatement.getResultSet();
-				while(result.next())
+				try(ResultSet result = prepareStatement.getResultSet())
 				{
-					userInfo.setUserId(result.getInt(1));
-					userInfo.setPassword(result.getString(2));
-					userInfo.setName(result.getString(3));
-					userInfo.setEmail(result.getString(4));
-					userInfo.setPhone(result.getLong(5));
-					userInfo.setAadhar(result.getLong(6));
-					userInfo.setRole(result.getString(7));
-					userInfo.setCity(result.getString(8));
-					userInfo.setStatus(result.getString(9));
-					userInfo.setAdminAccess(result.getString(10));
+					while(result.next())
+					{
+						userInfo.setUserId(result.getInt(1));
+						userInfo.setPassword(result.getString(2));
+						userInfo.setName(result.getString(3));
+						userInfo.setEmail(result.getString(4));
+						userInfo.setPhone(result.getLong(5));
+						userInfo.setAadhar(result.getLong(6));
+						userInfo.setRole(result.getString(7));
+						userInfo.setCity(result.getString(8));
+						userInfo.setStatus(result.getString(9));
+						userInfo.setAdminAccess(result.getString(10));
+					}
 				}
 			}
 		} 
@@ -110,8 +112,7 @@ public class DBBanking implements Storage
 		String query = "SELECT * FROM Accounts WHERE AccountNumber=? AND UserId = ? ;";
 		AccountsInfo accountsInfo = new AccountsInfo();
 		Connection connection = getConnection();
-		try(PreparedStatement prepareStatement = connection.prepareStatement(query);
-				ResultSet result = prepareStatement.getResultSet()) 
+		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
 		{
 			prepareStatement.setInt(1, accountNumber);
 			prepareStatement.setInt(2, userId);
@@ -122,16 +123,19 @@ public class DBBanking implements Storage
 			}
 			if(rescode)
 			{
-				while(result.next())
+				try(ResultSet result = prepareStatement.getResultSet())
 				{
-					accountsInfo.setUserId(result.getInt(1));
-					accountsInfo.setAccountNumber(result.getInt(2));
-					accountsInfo.setIfsc(result.getString(3));
-					accountsInfo.setBranch(result.getString(4));
-					accountsInfo.setType(result.getString(5));
-					accountsInfo.setStatus(result.getString(6));
-					accountsInfo.setBalance(result.getDouble(7));
-					accountsInfo.setAtmPin(result.getInt(8));
+					while(result.next())
+					{
+						accountsInfo.setUserId(result.getInt(1));
+						accountsInfo.setAccountNumber(result.getInt(2));
+						accountsInfo.setIfsc(result.getString(3));
+						accountsInfo.setBranch(result.getString(4));
+						accountsInfo.setType(result.getString(5));
+						accountsInfo.setStatus(result.getString(6));
+						accountsInfo.setBalance(result.getDouble(7));
+						accountsInfo.setAtmPin(result.getInt(8));
+					}
 				}
 			}
 		}
@@ -154,16 +158,18 @@ public class DBBanking implements Storage
 		String query = "SELECT Balance FROM Accounts WHERE UserId = ? AND AccountNumber = ?;";
 		Double balance = null;
 		Connection connection = getConnection();
-		try(PreparedStatement prepareStatement = connection.prepareStatement(query);
-				ResultSet result = prepareStatement.getResultSet()) 
+		try(PreparedStatement prepareStatement = connection.prepareStatement(query)) 
 		{
 			prepareStatement.setInt(1, userId);
 			prepareStatement.setInt(2, accountNumber);
 			boolean response = prepareStatement.execute();
 			if(response)
 			{
-				result.next();
-				balance = result.getDouble(1);
+				try(ResultSet result = prepareStatement.getResultSet())
+				{
+					result.next();
+					balance = result.getDouble(1);
+				}
 			}
 		}
 		catch (SQLException e) 
@@ -303,7 +309,7 @@ public class DBBanking implements Storage
 		{
 			prepareStatement.setString(1, newPassword);
 			prepareStatement.setInt(2, userId);
-			prepareStatement.setString(3, newPassword);
+			prepareStatement.setString(3, oldPassword);
 			prepareStatement.execute();
 		} 
 		catch (SQLException e) 
@@ -404,29 +410,32 @@ public class DBBanking implements Storage
 	public Map<?, ?> getMyAccountsInfo(Integer userId) throws BMException 
 	{
 		Utilities.INST.isNull(userId);
-		String query = "SELECT * FROM Accounts WHERE UserId = ? ;";
+		String query = "SELECT * FROM Accounts WHERE UserId = ? ";
 		Map<Integer,AccountsInfo> myAccounts = new HashMap<>();
 		Connection connection = getConnection();
-		try(PreparedStatement preparedStatement = connection.prepareStatement(query);
-				ResultSet result = preparedStatement.getResultSet())
+		try(PreparedStatement preparedStatement = connection.prepareStatement(query))
 		{
 			preparedStatement.setInt(1, userId);
 			boolean rescode = preparedStatement.execute();
 			if(rescode)
 			{
-				while(result.next())
+				try(ResultSet result = preparedStatement.getResultSet())
 				{
-					AccountsInfo accountsInfo = new AccountsInfo();
-					accountsInfo.setUserId(result.getInt(1));
-					accountsInfo.setAccountNumber(result.getLong(2));
-					accountsInfo.setIfsc(result.getString(3));
-					accountsInfo.setBranch(result.getString(4));
-					accountsInfo.setType(result.getString(5));
-					accountsInfo.setStatus(result.getString(6));
-					accountsInfo.setBalance(result.getDouble(7));
-					accountsInfo.setAtmPin(result.getInt(9));
-					myAccounts.put((int) accountsInfo.getAccountNumber(), accountsInfo);
+					while(result.next())
+					{
+						AccountsInfo accountsInfo = new AccountsInfo();
+						accountsInfo.setUserId(result.getInt(1));
+						accountsInfo.setAccountNumber(result.getLong(2));
+						accountsInfo.setIfsc(result.getString(3));
+						accountsInfo.setBranch(result.getString(4));
+						accountsInfo.setType(result.getString(5));
+						accountsInfo.setStatus(result.getString(6));
+						accountsInfo.setBalance(result.getDouble(7));
+						accountsInfo.setAtmPin(result.getInt(8));
+						myAccounts.put((int) accountsInfo.getAccountNumber(), accountsInfo);
+					}
 				}
+
 			}
 		} 
 		catch (SQLException e) 
@@ -479,18 +488,19 @@ public class DBBanking implements Storage
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountsInfo);
-		String query = "INSERT INTO Accounts VALUES(?,?,?,?,?,?,?,?,?) ;";
+		String query = "INSERT INTO Accounts VALUES(?,?,?,?,?,?,?) ;";
 		Connection connection = getConnection();
 		try(PreparedStatement preparedStatement = connection.prepareStatement(query)) 
 		{
-			preparedStatement.setInt(1, accountsInfo.getUserId());
-			preparedStatement.setLong(2, accountsInfo.getAccountNumber());
-			preparedStatement.setString(3, accountsInfo.getIfsc());
-			preparedStatement.setString(4, accountsInfo.getBranch());
-			preparedStatement.setString(5, accountsInfo.getType());
-			preparedStatement.setString(6, accountsInfo.getStatus());
-			preparedStatement.setDouble(7, accountsInfo.getBalance());
-			preparedStatement.setInt(8, accountsInfo.getAtmPin());
+//			preparedStatement.setInt(1, accountsInfo.getUserId());
+			preparedStatement.setLong(1, accountsInfo.getAccountNumber());
+			preparedStatement.setString(2, accountsInfo.getIfsc());
+			preparedStatement.setString(3, accountsInfo.getBranch());
+			preparedStatement.setString(4, accountsInfo.getType());
+			preparedStatement.setString(5, accountsInfo.getStatus());
+			preparedStatement.setDouble(6, accountsInfo.getBalance());
+			preparedStatement.setInt(7, accountsInfo.getAtmPin());
+			preparedStatement.execute();
 		}
 		catch (SQLException e) 
 		{
@@ -506,13 +516,13 @@ public class DBBanking implements Storage
 	{
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountsInfo);
-		String query = "UPDATE Accounts SET Status = \"Inactive\" WHERE AccountNumber = ? AND UserId = ? ;";
+		String query = "UPDATE Accounts SET Status = ? WHERE AccountNumber = ? AND UserId = ? ;";
 		Connection connection = getConnection();
 		try (PreparedStatement preparedStatement = connection.prepareStatement(query))
 		{
-
-			preparedStatement.setLong(1, accountsInfo.getAccountNumber());
-			preparedStatement.setInt(2, accountsInfo.getUserId());
+			preparedStatement.setString(1, "Inactive");
+			preparedStatement.setLong(2, accountsInfo.getAccountNumber());
+			preparedStatement.setInt(3, accountsInfo.getUserId());
 			preparedStatement.execute();
 		}
 		catch (SQLException e) 
@@ -595,17 +605,21 @@ public class DBBanking implements Storage
 	public void addTransaction(TransactionInfo transactionInfo) throws BMException 
 	{
 		Utilities.INST.isNull(transactionInfo);
-		String addTransactionQuery = "INSERT INTO Transaction VALUES(?,?,?,?,?,?,?)";
+//		String addTransactionQuery = "INSERT INTO Transaction (UserId,Sender,Receiver,Amount,Time,Status) VALUES(?,?,?,?,?,?)";
+		String addTransactionQuery = "INSERT INTO Transaction (UserId,Sender,Receiver,Amount,Time,Status) VALUES(?,?,?,?,?,?);";
 		Connection connection = getConnection();
 		try(PreparedStatement addTransaction = connection.prepareStatement(addTransactionQuery))
 		{
-			addTransaction.setInt(1, transactionInfo.getTransactionId());
-			addTransaction.setInt(2, transactionInfo.getUserId());
-			addTransaction.setLong(3, transactionInfo.getSenderAccountNumber());
-			addTransaction.setLong(4, transactionInfo.getReceiverAccountNumber());
-			addTransaction.setFloat(5, (float) transactionInfo.getAmount());
-			addTransaction.setLong(6, transactionInfo.getTime());
-			addTransaction.setString(7, transactionInfo.getStatus());
+//			addTransaction.setInt(1, transactionInfo.getTransactionId());
+			addTransaction.setInt(1, transactionInfo.getUserId());
+			addTransaction.setLong(2, transactionInfo.getSenderAccountNumber());
+			addTransaction.setLong(3, transactionInfo.getReceiverAccountNumber());
+			addTransaction.setDouble(4,transactionInfo.getAmount());
+			addTransaction.setLong(5, transactionInfo.getTime());
+			addTransaction.setString(6, transactionInfo.getStatus());
+			addTransaction.setString(7,transactionInfo.getType());
+			System.out.println(transactionInfo);
+			System.out.println(addTransactionQuery);
 			addTransaction.execute();
 		} 
 		catch (SQLException e)
@@ -622,24 +636,27 @@ public class DBBanking implements Storage
 	public TransactionInfo getTransaction(Integer transactionId) throws BMException 
 	{
 		Utilities.INST.isNull(transactionId);
-		String getTransactionQuery = "SELECT * FROM Transaction WHERE TransactionId = ? ;";
+		String getTransactionQuery = "SELECT * FROM Transaction WHERE Id = ?";
 		Connection connection = getConnection();
 		TransactionInfo myTransaction = new TransactionInfo();
-		try(PreparedStatement getTransaction = connection.prepareStatement(getTransactionQuery);
-				ResultSet result = getTransaction.getResultSet())
+		try(PreparedStatement getTransaction = connection.prepareStatement(getTransactionQuery))
 		{
 			getTransaction.setInt(1, transactionId);
 			boolean rescode = getTransaction.execute();
-			if(rescode)
+			try(ResultSet result = getTransaction.getResultSet())
 			{
-				result.next();
-				myTransaction.setTransactionId(result.getInt(1));
-				myTransaction.setUserId(result.getInt(2));
-				myTransaction.setSenderAccountNumber(result.getInt(3));
-				myTransaction.setReceiverAccountNumber(result.getInt(4));
-				myTransaction.setAmount(result.getDouble(5));
-				myTransaction.setTime(result.getLong(6));
-				myTransaction.setStatus(result.getString(7));
+				if(rescode)
+				{
+					result.next();
+					myTransaction.setTransactionId(result.getInt(1));
+					myTransaction.setUserId(result.getInt(2));
+					myTransaction.setSenderAccountNumber(result.getInt(3));
+					myTransaction.setReceiverAccountNumber(result.getInt(4));
+					myTransaction.setAmount(result.getDouble(5));
+					myTransaction.setTime(result.getLong(6));
+					myTransaction.setStatus(result.getString(7));
+					myTransaction.setType(result.getString(8));
+				}
 			}
 		}
 		catch (SQLException e) 
@@ -658,28 +675,32 @@ public class DBBanking implements Storage
 		String getAllTransactionQuery = "SELECT * FROM Transaction";
 		Map<Integer,TransactionInfo> transactions = new HashMap<>();
 		Connection connection = getConnection();
-		try(PreparedStatement getAllTransaction = connection.prepareStatement(getAllTransactionQuery);
-				ResultSet result = getAllTransaction.getResultSet())
+		try(PreparedStatement getAllTransaction = connection.prepareStatement(getAllTransactionQuery))
 		{
 			boolean rescode = getAllTransaction.execute();
 			if(rescode)
 			{
-				while(result.next())
+				try(ResultSet result = getAllTransaction.getResultSet())
 				{
-					TransactionInfo transactionInfo = new TransactionInfo();
-					transactionInfo.setTransactionId(result.getInt(1));
-					transactionInfo.setUserId(result.getInt(2));
-					transactionInfo.setSenderAccountNumber(result.getInt(3));
-					transactionInfo.setReceiverAccountNumber(result.getInt(4));
-					transactionInfo.setAmount(result.getDouble(5));
-					transactionInfo.setTime(result.getLong(6));
-					transactionInfo.setStatus(result.getString(7));
-					transactions.put(transactionInfo.getTransactionId(), transactionInfo);
+					while(result.next())
+					{
+						TransactionInfo transactionInfo = new TransactionInfo();
+						transactionInfo.setTransactionId(result.getInt(1));
+						transactionInfo.setUserId(result.getInt(2));
+						transactionInfo.setSenderAccountNumber(result.getInt(3));
+						transactionInfo.setReceiverAccountNumber(result.getInt(4));
+						transactionInfo.setAmount(result.getDouble(5));
+						transactionInfo.setTime(result.getLong(6));
+						transactionInfo.setStatus(result.getString(7));
+						transactionInfo.setType(result.getString(8));
+						transactions.put(transactionInfo.getTransactionId(), transactionInfo);
+					}
 				}
 			}
 		}
 		catch (SQLException e) 
 		{
+			e.printStackTrace();
 			throw new BMException("Failed To Approve Transaction status",e);
 		}
 		finally
@@ -692,11 +713,12 @@ public class DBBanking implements Storage
 	public void grantApproval(Integer transactionId) throws BMException 
 	{
 		Utilities.INST.isNull(transactionId);
-		String grantApproveQuery = "UPDATE Transaction SET Status= \"Approved\" WHERE TransactionId = ? ;";
+		String grantApproveQuery = "UPDATE Transaction SET Status= ? WHERE TransactionId = ? ;";
 		Connection connection = getConnection();
 		try(PreparedStatement grantApprove = connection.prepareStatement(grantApproveQuery))
 		{
-			grantApprove.setInt(1, transactionId);
+			grantApprove.setString(1, "Approved");
+			grantApprove.setInt(2, transactionId);
 			grantApprove.execute();
 		}
 		catch (SQLException e) 

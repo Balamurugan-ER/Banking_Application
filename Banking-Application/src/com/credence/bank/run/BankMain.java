@@ -26,6 +26,7 @@ public class BankMain
 {
 	boolean authenticated;
 	boolean admin;
+	int userId;
 	public static FileHandler fileHandler;
 	public static Logger logFile = Logger.getLogger(BankMain.class.getName());
 	public static Logger logConsole = Logger.getLogger(BankMain.class.getName());
@@ -38,7 +39,7 @@ public class BankMain
 		}
 
 		System.out.println("Enter UserId    : ");
-		int userId = scanner.nextInt();
+		userId = scanner.nextInt();
 		System.out.println("Enter EmailId   : ");
 		String email = scanner.next();
 		System.out.println("Enter Password  : ");
@@ -48,21 +49,29 @@ public class BankMain
 		{
 			Authentication auth = new Authentication();
 			authenticated = auth.login(userId, email, password);
+			if(!authenticated)
+			{
+				throw new BMException("Invalid Credentials");
+			}
 			UserInfo currentUser = BankingRouterProvider.INST.getProfileInfo(userId);
 			String role = currentUser.getAdminAccess();
-			if(role.equals("user"))
+			if(authenticated)
 			{
-				admin = false;
-			}
-			if(role.equals("admin"))
-			{
-				admin = true;
+				if(role.equals("user"))
+				{
+					admin = false;
+				}
+				if(role.equals("admin"))
+				{
+					admin = true;
+				}
 			}
 		}
 		catch (BMException e) 
 		{
 			e.printStackTrace();
 			logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+			throw new BMException(e.getMessage());
 		}
 		return authenticated;
 
@@ -82,12 +91,19 @@ public class BankMain
 		if(banking.admin)
 		{
 			AdminPage admin = new AdminPage();
-			admin.adminPage(banking.authenticated,scanner);
+			admin.adminPage(banking.authenticated,scanner,banking.userId);
 		}
 		else
 		{
 			UserPage user = new UserPage();
-			user.userPage(banking.authenticated,scanner);
+			try 
+			{
+				user.userPage(banking.userId,banking.authenticated,scanner);
+			} catch (BMException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 }

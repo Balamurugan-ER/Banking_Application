@@ -68,7 +68,14 @@ public class AccountsInfo
 	}
 	public String toString()
 	{
-		String row = "{ "+getUserId()+","+getAccountNumber()+","+getIfsc()+","+getBalance()+","+getBranch()+","+getType()+","+getStatus()+" }";
+		String row = "{ \n"
+				+ "UserId			:"+getUserId()+",\n"
+				+ "AccountNumber	:"+getAccountNumber()+",\n"
+				+ "IFSC Code		:"+getIfsc()+",\n"
+				+ "Balance			:"+getBalance()+",\n"
+				+ "Branch			:"+getBranch()+",\n"
+				+ "Type				:"+getType()+",\n"
+				+ "Status			:"+getStatus()+"\n }";
 		return row;
 	}
 }

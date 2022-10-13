@@ -84,8 +84,8 @@ public enum BankingRouterProvider implements BankingRouter
 		Utilities.INST.isNull(amount);
 		TransactionInfo newTransaction = new TransactionInfo();
 		newTransaction.setAmount(amount);
-		newTransaction.setReceiverAccountNumber(fromAccountNumber);
-		newTransaction.setSenderAccountNumber(toAccountNumber);
+		newTransaction.setReceiverAccountNumber(toAccountNumber);
+		newTransaction.setSenderAccountNumber(fromAccountNumber);
 		newTransaction.setUserId(userId);
 		newTransaction.setTime(System.currentTimeMillis());
 		newTransaction.setStatus("Pending");

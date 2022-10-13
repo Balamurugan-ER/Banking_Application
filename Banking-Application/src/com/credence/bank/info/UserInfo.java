@@ -84,7 +84,15 @@ public class UserInfo
 	@Override
 	public String toString()
 	{
-		String row = "{"+getUserId()+","+getName()+","+getEmail()+","+getPhone()+","+getRole()+","+getAadhar()+","+getCity()+","+getAdminAccess()+"}";
+		String row = "{\n"
+				+ "UserId 		: "+getUserId()+",\n"
+				+ "Name 		: "+getName()+",\n"
+				+ "Email 		:"+getEmail()+",\n"
+				+ "Phone 		:"+getPhone()+",\n"
+				+ "Role			:"+getRole()+",\n"
+				+ "Aadhar  		:"+getAadhar()+",\n"
+				+ "City 		:"+getCity()+",\n"
+				+ "AdminAccess	:"+getAdminAccess()+"\n}";
 		return row;
 	}
 	

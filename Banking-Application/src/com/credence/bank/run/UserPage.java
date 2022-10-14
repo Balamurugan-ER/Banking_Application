@@ -3,6 +3,7 @@
  */
 package com.credence.bank.run;
 
+import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -54,16 +55,28 @@ public class UserPage
 				+ "20.change Type\n"
 				+ "21.change AtmPin\n"
 				+ "22.Check Transaction Information\n"
-				+ "");
+				+ "0.Exit\n"
+				+ "100.Setup Install\n"
+				+ "150.Save Changes\n");
+		
 		if(authenticated)
 		{
 			session = true;
 		}
+		
 		while(session)
 		{
-
+			int operation =-1;
 			logConsole.log(Level.INFO, "Enter Your Wish : ");
-			int operation = scan.nextInt();
+			try
+			{
+//				operation = Integer.parseInt(scan.next());
+				operation = scan.nextInt();
+			}
+			catch(InputMismatchException e)
+			{
+				//logConsole.log(Level.SEVERE, "Invalid input");
+			}
 			switch(operation)
 			{
 			case 1:
@@ -75,46 +88,66 @@ public class UserPage
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
 			case 2:
 			{
-				AccountsInfo accounts = new AccountsInfo();
-				accounts.setUserId(thisUserId);
-				logConsole.log(Level.INFO, "Enter AccountNumber");
-				long accountNumber = scan.nextInt();
-				accounts.setAccountNumber(accountNumber);
-				logConsole.log(Level.INFO, "Ifsc Code");
-				String ifsc = scan.next();
-				accounts.setIfsc(ifsc);
-				accounts.setStatus("Active");
-				logConsole.log(Level.INFO,"Enter Atm Pin");
-				int atmPin = scan.nextInt();
-				accounts.setAtmPin(atmPin);
-				logConsole.log(Level.INFO, "Enter Account Type");
-				String accountType = scan.next();
-				accounts.setType(accountType);
-				logConsole.log(Level.INFO, "Enter Branch");
-				String branch = scan.next();
-				accounts.setBranch(branch);
-				logConsole.log(Level.INFO, "Enter balance");
-				double balance = scan.nextDouble();
-				accounts.setBalance(balance);
-				boolean rescode = userRouter.createAccount(userId, accounts);
-				if(rescode)
+				try
 				{
-					logConsole.log(Level.INFO, "Accounts added SuccessFully");
+					AccountsInfo accounts = new AccountsInfo();
+					accounts.setUserId(thisUserId);
+					logConsole.log(Level.INFO, "Enter AccountNumber");
+					long accountNumber = scan.nextInt();
+					accounts.setAccountNumber(accountNumber);
+					logConsole.log(Level.INFO, "Ifsc Code");
+					String ifsc = scan.next();
+					accounts.setIfsc(ifsc);
+					accounts.setStatus("Active");
+					logConsole.log(Level.INFO,"Enter Atm Pin");
+					int atmPin = scan.nextInt();
+					accounts.setAtmPin(atmPin);
+					logConsole.log(Level.INFO, "Enter Account Type");
+					String accountType = scan.next();
+					accounts.setType(accountType);
+					logConsole.log(Level.INFO, "Enter Branch");
+					String branch = scan.next();
+					accounts.setBranch(branch);
+					logConsole.log(Level.INFO, "Enter balance");
+					double balance = scan.nextDouble();
+					accounts.setBalance(balance);
+					boolean rescode = false;
+					rescode = userRouter.createAccount(userId, accounts);
+					if(rescode)
+					{
+						logConsole.log(Level.INFO, "Accounts added SuccessFully");
+					}
+					else
+					{
+						logConsole.log(Level.INFO, "Failed to remove Account");
+					}
 				}
-				else
+				catch(InputMismatchException e)
 				{
-					logConsole.log(Level.INFO, "Failed to remove Account");
+					throw new BMException("Invalid Input");
+				}
+				catch(BMException e)
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 			}
 			case 3:
 			{
-				boolean status = userRouter.removeUser(thisUserId);
+				boolean status = false;
+				try
+				{
+					status = userRouter.removeUser(thisUserId);
+				}
+				catch(BMException e)
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+				}
 				if(status)
 				{
 					logConsole.log(Level.INFO, "User Removed SuccessFully");
@@ -137,7 +170,7 @@ public class UserPage
 				}
 				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -153,7 +186,7 @@ public class UserPage
 				}
 				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -180,7 +213,7 @@ public class UserPage
 				}
 				catch(BMException e)
 				{
-					e.printStackTrace();
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -206,7 +239,7 @@ public class UserPage
 				}
 				catch(BMException e)
 				{
-					e.printStackTrace();
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -230,7 +263,7 @@ public class UserPage
 				}
 				catch(BMException e)
 				{
-					e.printStackTrace();
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -254,7 +287,7 @@ public class UserPage
 				}
 				catch(BMException e)
 				{
-					e.printStackTrace();
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -269,9 +302,9 @@ public class UserPage
 						System.out.println(myAccounts.get(key));
 					}
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -287,9 +320,9 @@ public class UserPage
 						logConsole.log(Level.INFO, "{0}",account);
 					}
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -311,9 +344,9 @@ public class UserPage
 					}
 					
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -334,9 +367,9 @@ public class UserPage
 					}
 					
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -357,9 +390,9 @@ public class UserPage
 					}
 					
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -380,9 +413,9 @@ public class UserPage
 					}
 					
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -403,9 +436,9 @@ public class UserPage
 					}
 					
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -426,9 +459,9 @@ public class UserPage
 					}
 					
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -451,9 +484,9 @@ public class UserPage
 					}
 					
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -475,9 +508,9 @@ public class UserPage
 					}
 					
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -499,9 +532,9 @@ public class UserPage
 					}
 					
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -526,9 +559,9 @@ public class UserPage
 					}
 					
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -538,7 +571,7 @@ public class UserPage
 				int transactionId = scan.nextInt();
 				try 
 				{
-					TransactionInfo transaction = userRouter.getTransaction(transactionId);
+					TransactionInfo transaction = userRouter.getTransaction(thisUserId,transactionId);
 					if(transaction != null)
 					{
 						logConsole.log(Level.INFO, "{0}",transaction);
@@ -548,20 +581,15 @@ public class UserPage
 						logConsole.log(Level.INFO, "Fetching TransactionInfo Process Failed ");
 					}
 				}
-				catch (BMException e) 
+				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
 			case 0:
 			{
 				session = false;
-				break;
-			}
-			default:
-			{
-				logConsole.log(Level.INFO, "Invalid Operation Id");
 				break;
 			}
 			}

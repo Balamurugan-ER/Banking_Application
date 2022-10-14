@@ -373,6 +373,31 @@ public class FBanking implements Storage
 		TransactionInfo thisTransaction = transactions.get(transactionId);
 		thisTransaction.setStatus("Approved");
 	}
+	@Override
+	public Double getBalance(Integer accountNumber) throws BMException
+	{
+		return null;
+		
+	}
+	@Override
+	public Map<?, ?> getAllPendingTransaction() throws BMException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void rejectTransaction(Integer transactionId) throws BMException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void reActivateUser(Integer userId) throws BMException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void reActivateAccount(Integer accountNumber) throws BMException {
+		// TODO Auto-generated method stub
+		
+	}
 	
-
 }

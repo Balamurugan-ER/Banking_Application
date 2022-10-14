@@ -18,6 +18,10 @@ public interface UserRouter
 {
 public boolean addUser(UserInfo userInfo) throws BMException;
 	
+	public void setup() throws BMException;
+
+	public void saveChanges() throws BMException;
+	
 	public boolean createAccount(Integer userId,AccountsInfo accountInfo) throws BMException;
 	
 	//TODO remove user
@@ -84,5 +88,5 @@ public boolean addUser(UserInfo userInfo) throws BMException;
 	
 	public void addTransaction(TransactionInfo transactionInfo) throws BMException;
 	
-	public TransactionInfo getTransaction(Integer transactionId) throws BMException;
+	public TransactionInfo getTransaction(Integer userId,Integer transactionId) throws BMException;
 }

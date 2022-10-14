@@ -92,6 +92,7 @@ public class UserInfo
 				+ "Role			:"+getRole()+",\n"
 				+ "Aadhar  		:"+getAadhar()+",\n"
 				+ "City 		:"+getCity()+",\n"
+				+ "Status		:"+getStatus()+",\n"
 				+ "AdminAccess	:"+getAdminAccess()+"\n}";
 		return row;
 	}

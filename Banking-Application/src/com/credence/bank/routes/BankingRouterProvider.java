@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
+import com.credence.bank.authentication.Authentication;
 import com.credence.bank.banking.Storage;
 import com.credence.bank.controller.Transaction;
 import com.credence.bank.controller.TransactionRouter;
@@ -15,18 +16,19 @@ import com.credence.bank.info.TransactionInfo;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.util.BMException;
 import com.credence.bank.util.EnvProperties;
+import com.credence.bank.util.Session;
 import com.credence.bank.util.Utilities;
 
 /**
  * @author Balamurugan
  *
  */
-
-//TODO null Check for all values
 public enum BankingRouterProvider implements BankingRouter
 {
 	INST;
+	private int userId;
 	private static Storage banking;
+	private Authentication auth = new Authentication();
 	private static Transaction transaction = new TransactionRouter();
 	
 	private static Storage getStorage() throws BMException 
@@ -37,6 +39,14 @@ public enum BankingRouterProvider implements BankingRouter
 		}
 		return banking;
 	}
+	private boolean isAdmin() throws BMException
+	{
+		if(auth.isAdmin())
+		{
+			return true;
+		}
+		throw new BMException("Not an Admin");
+	}
 	@Override
 	public boolean addUser(UserInfo userInfo) throws BMException 
 	{
@@ -45,7 +55,7 @@ public enum BankingRouterProvider implements BankingRouter
 		banking.createUser(userInfo);
 		return true;
 	}
-
+	
 	@Override
 	public boolean createAccount(Integer userId, AccountsInfo accountInfo) throws BMException
 	{
@@ -59,10 +69,16 @@ public enum BankingRouterProvider implements BankingRouter
 	@Override
 	public boolean removeUser(Integer userId) throws BMException
 	{
-		banking = getStorage();
 		Utilities.INST.isNull(userId);
-		banking.removeUser(userId);
-		return true;
+		UserInfo user = getProfileInfo(userId);
+		String access = user.getAdminAccess();
+		if(access.equals("user"))
+		{
+			banking = getStorage();
+			banking.removeUser(userId);
+			return true;
+		}
+		throw new BMException("Admin user Cannot able to delete");
 	}
 
 	@Override
@@ -71,7 +87,7 @@ public enum BankingRouterProvider implements BankingRouter
 		banking = getStorage();
 		Utilities.INST.isNull(userId);
 		Utilities.INST.isNull(accountNumber);
-		return banking.getBalance(userId, accountNumber);//swami
+		return banking.getBalance(userId, accountNumber);
 	}
 
 	@Override
@@ -306,25 +322,81 @@ public enum BankingRouterProvider implements BankingRouter
 	public void addTransaction(TransactionInfo transactionInfo) throws BMException 
 	{
 		Utilities.INST.isNull(transactionInfo);
+		double amount = transactionInfo.getAmount();
+		Integer accountNum = transactionInfo.getSenderAccountNumber();
+		double curentBalance = banking.getBalance(accountNum);
+		if(curentBalance < amount)
+		{
+			throw new BMException("Transaction Add failed - Insufficient Balance");
+		}
 		transaction.addTransaction(transactionInfo);
 	}
 	@Override
-	public TransactionInfo getTransaction(Integer transactionId) throws BMException 
+	public TransactionInfo getTransaction(Integer userId,Integer transactionId) throws BMException 
 	{
 		Utilities.INST.isNull(transactionId);
-		return transaction.getTransaction(transactionId);
+		UserInfo user = getProfileInfo(userId);
+		String access = user.getAdminAccess();
+		TransactionInfo myTransaction = transaction.getTransaction(transactionId);
+		Integer transUserId = myTransaction.getUserId();
+		if(access.equals("admin") || userId == transUserId)
+		{
+			return myTransaction;
+		}
+		else
+		{
+			throw new BMException("UnAuthorized Access");
+		}
 	}
 	@Override
-	public Map<?, ?> getAllTransaction() throws BMException {
+	public Map<?, ?> getAllTransaction() throws BMException 
+	{
 		
 		return transaction.getAllTransaction();
 	}
 	@Override
 	public void grantApproval(Integer transactionId) throws BMException 
 	{
+		
 		Utilities.INST.isNull(transactionId);
 		transaction.grantApproval(transactionId);
-		
+	}
+	@Override
+	public void setup() throws BMException 
+	{
+		banking.setup();
+	}
+	@Override
+	public void saveChanges() throws BMException 
+	{
+		banking.saveChanges();
+	}
+	@Override
+	public Map<?, ?> getAllPendingTransaction() throws BMException 
+	{
+		isAdmin();
+		return transaction.getAllPendingTransaction();
+	}
+	@Override
+	public void rejectTransaction(Integer transactionId) throws BMException 
+	{
+		isAdmin();
+		Utilities.INST.isNull(transactionId);
+		transaction.rejectTransaction(transactionId);
+	}
+	@Override
+	public void reActivateUser(Integer userId) throws BMException 
+	{
+		isAdmin();
+		Utilities.INST.isNull(userId);
+		banking.reActivateUser(userId);
+	}
+	@Override
+	public void reActivateAccount(Integer accountNumber) throws BMException 
+	{
+		isAdmin();
+		Utilities.INST.isNull(accountNumber);
+		banking.reActivateAccount(accountNumber);
 	}
 	
 } 

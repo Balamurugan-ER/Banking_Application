@@ -16,8 +16,6 @@ import com.credence.bank.util.Utilities;
  */
 public class TransactionRouter implements Transaction
 {
-	
-	
 	private static Storage banking;
 	
 	private static Storage getStorage() throws BMException 
@@ -50,33 +48,6 @@ public class TransactionRouter implements Transaction
 		return banking.getAllTransaction();
 	}
 
-//	public void grantApproval(Integer transactionId) throws BMException
-//	{
-//		banking = getStorage();
-//		banking.grantApproval(transactionId);
-//		TransactionInfo thisTransaction = getTransaction(transactionId);
-//	
-//		if(thisTransaction.getStatus().equals("Approved"))
-//		{
-//			if(thisTransaction.getType().equals("selfDeposit"))
-//			{
-//				banking.selfDeposit(thisTransaction.getUserId(), thisTransaction.getReceiverAccountNumber(), thisTransaction.getAmount());
-//			}
-//			if(thisTransaction.getType().equals("otherDeposit"))
-//			{
-//				banking.otherDeposit(thisTransaction.getReceiverAccountNumber(), thisTransaction.getAmount());
-//			}
-//			if(thisTransaction.getType().equals("withDraw"))
-//			{
-//				banking.withDraw(thisTransaction.getUserId(), thisTransaction.getReceiverAccountNumber(), thisTransaction.getAmount());
-//			}
-//			if(thisTransaction.getType().equals("moneyTransfer"))
-//			{
-//				banking.moneyTransfer(thisTransaction.getUserId(), thisTransaction.getSenderAccountNumber(), thisTransaction.getReceiverAccountNumber(), thisTransaction.getAmount());
-//			}
-//		}
-//	}
-
 	public void grantApproval(Integer transactionId) throws BMException
 	{
 		Utilities.INST.isNull(transactionId);
@@ -101,6 +72,11 @@ public class TransactionRouter implements Transaction
 			}
 			if(type.equals(TransactionType.WITHDRAW.getType()))
 			{
+				Double curentBalance = banking.getBalance(userId, receiverAccountNumber);
+				if(curentBalance < amount)
+				{
+					throw new BMException("Insufficient Balance to do this Transaction");
+				}
 				banking.withDraw(userId, receiverAccountNumber, amount);
 			}
 			if(type.equals(TransactionType.MONEYTRANSFER.getType()))
@@ -108,6 +84,16 @@ public class TransactionRouter implements Transaction
 				banking.moneyTransfer(userId, senderAccountNumber, receiverAccountNumber, amount);
 			}
 		}
+	}
+	@Override
+	public Map<?, ?> getAllPendingTransaction() throws BMException 
+	{
+		return banking.getAllPendingTransaction();
+	}
+	@Override
+	public void rejectTransaction(Integer transactionId) throws BMException 
+	{
+		banking.rejectTransaction(transactionId);
 	}
 
 }

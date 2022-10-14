@@ -55,6 +55,9 @@ public interface Transaction
 	 */
 	public Map<?,?> getAllTransaction() throws BMException;
 	
+	
+	public Map<?, ?> getAllPendingTransaction() throws BMException;
+	
 	/**
 	 * @category approving users request.
 	 * @param requestId
@@ -62,5 +65,7 @@ public interface Transaction
 	 * @category admin Specific method.
 	 */
 	public void grantApproval(Integer transactionId) throws BMException;
+	
+	public void rejectTransaction(Integer transactionId) throws BMException;
 	
 }

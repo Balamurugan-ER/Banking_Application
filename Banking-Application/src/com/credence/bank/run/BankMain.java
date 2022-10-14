@@ -5,6 +5,7 @@ package com.credence.bank.run;
 
 import java.io.Console;
 import java.io.IOException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -37,16 +38,15 @@ public class BankMain
 		{
 			return authenticated;
 		}
-
-		System.out.println("Enter UserId    : ");
-		userId = scanner.nextInt();
-		System.out.println("Enter EmailId   : ");
-		String email = scanner.next();
-		System.out.println("Enter Password  : ");
-		String password = scanner.next();
-		BankMain banking = new BankMain();
 		try 
 		{
+			System.out.println("Enter UserId    : ");
+			userId = scanner.nextInt();
+			System.out.println("Enter EmailId   : ");
+			String email = scanner.next();
+			System.out.println("Enter Password  : ");
+			String password = scanner.next();
+			BankMain banking = new BankMain();
 			Authentication auth = new Authentication();
 			authenticated = auth.login(userId, email, password);
 			if(!authenticated)
@@ -67,10 +67,12 @@ public class BankMain
 				}
 			}
 		}
+		catch(InputMismatchException e)
+		{
+			throw new BMException("Invalid Input",e);
+		}
 		catch (BMException e) 
 		{
-			e.printStackTrace();
-			logConsole.log(Level.SEVERE, "{0}",e.getMessage());
 			throw new BMException(e.getMessage());
 		}
 		return authenticated;
@@ -80,30 +82,25 @@ public class BankMain
 	public static void main(String[] args) 
 	{
 		BankMain banking = new BankMain();
+		
 		try 
 		{
 			banking.doAuthentication();
+			if(banking.admin)
+			{
+				AdminPage admin = new AdminPage();
+				admin.adminPage(banking.authenticated,scanner,banking.userId);
+			}
+			else
+			{
+				UserPage user = new UserPage();
+				user.userPage(banking.userId,banking.authenticated,scanner);
+			}
 		} 
 		catch (BMException e) 
 		{
-			e.printStackTrace();
+			logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 		}
-		if(banking.admin)
-		{
-			AdminPage admin = new AdminPage();
-			admin.adminPage(banking.authenticated,scanner,banking.userId);
-		}
-		else
-		{
-			UserPage user = new UserPage();
-			try 
-			{
-				user.userPage(banking.userId,banking.authenticated,scanner);
-			} catch (BMException e) 
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		
 	}
 }

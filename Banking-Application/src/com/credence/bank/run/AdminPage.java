@@ -3,6 +3,7 @@
  */
 package com.credence.bank.run;
 
+import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -14,6 +15,7 @@ import com.credence.bank.info.UserInfo;
 import com.credence.bank.routes.BankingRouter;
 import com.credence.bank.routes.BankingRouterProvider;
 import com.credence.bank.util.BMException;
+import com.credence.bank.util.Utilities;
 
 /**
  * @author Balamurugan
@@ -24,7 +26,7 @@ public class AdminPage
 	private static Scanner scan;
 	private int thisUserId;
 	private static Logger logConsole = Logger.getLogger(AdminPage.class.getName());
-	public void adminPage(boolean authenticated,Scanner scanner,int userID)
+	public void adminPage(boolean authenticated,Scanner scanner,int userID) 
 	{
 		this.thisUserId = userID; 
 		boolean session = false;
@@ -55,113 +57,151 @@ public class AdminPage
 				+ "22.change AtmPin\n"
 				+ "23.Check Transaction Information\n"
 				+ "24.getAll Transaction List\n"
-				+ "25.grant Approval for Transactions"
+				+ "25.get all Pending Transactions\n"
+				+ "26.Reject Transaction"
+				+ "27.grant Approval for Transactions\n"
+				+ "100.Run initial Setup\n"
+				+ "150.Save Changes\n"
 				+ "0.Exit");
-		
+
+
+
 		if(authenticated)
 		{
 			session = true;
 		}
 		while(session)
 		{
-
 			logConsole.log(Level.INFO, "Enter Your Wish : ");
-			int operation = scan.nextInt();
+			int operation = -1;
+			try
+			{
+				operation = Integer.parseInt(scan.next());		
+			}
+			catch(NumberFormatException exception)
+			{
+				logConsole.log(Level.SEVERE, "Wrong input");
+			}
+			
 			switch(operation)
 			{
 			case 1:
 			{
 				try 
 				{
-					UserInfo user = bankingRouter.getProfileInfo(thisUserId);
+					logConsole.log(Level.INFO, "Enter UserId  : ");
+					int customerId = scan.nextInt();
+					UserInfo user = bankingRouter.getProfileInfo(customerId);
 					logConsole.log(Level.INFO,"{0}" ,user);
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
 			case 2:
 			{
-				UserInfo user = new UserInfo();
-				logConsole.log(Level.INFO, "Enter Name");
-				String name = scan.next();
-				logConsole.log(Level.INFO, "Enter Email");
-				String email = scan.next();
-				logConsole.log(Level.INFO, "Enter password");
-				String password = scan.next();
-				logConsole.log(Level.INFO, "Enter phone");
-				long phone = scan.nextLong();
-				logConsole.log(Level.INFO, "Enter aadhar");
-				long aadhar = scan.nextLong();
-				logConsole.log(Level.INFO, "Enter city");
-				String city = scan.next();
-				logConsole.log(Level.INFO, "Enter role");
-				String role = scan.next();
-				logConsole.log(Level.INFO, "Enter status");
-				String status = scan.next();
-				logConsole.log(Level.INFO, "Enter adminAccess");
-				String adminAccess = scan.next();
-				user.setName(name);
-				user.setAadhar(aadhar);
-				user.setAdminAccess(adminAccess);
-				user.setCity(city);
-				user.setEmail(email);
-				user.setPassword(password);
-				user.setRole(role);
-				user.setStatus(status);
-				user.setPhone(phone);
+				try 
+				{
+					boolean rescode = false;
+					UserInfo user = new UserInfo();
+					logConsole.log(Level.INFO, "Enter Name");
+					String name = scan.next();
+					user.setName(name);
+					logConsole.log(Level.INFO, "Enter Email");
+					String email = scan.next();
+					logConsole.log(Level.INFO, "Enter password");
+					String password = scan.next();
+					logConsole.log(Level.INFO, "Enter phone");
+					long phone = scan.nextLong();
+					logConsole.log(Level.INFO, "Enter aadhar");
+					long aadhar = scan.nextLong();
+					user.setAadhar(aadhar);
+					logConsole.log(Level.INFO, "Enter city");
+					String city = scan.next();
+					logConsole.log(Level.INFO, "Enter role");
+					String role = scan.next();
+					logConsole.log(Level.INFO, "Enter status");
+					String status = scan.next();
+					logConsole.log(Level.INFO, "Enter adminAccess");
+					String adminAccess = scan.next();
+					user.setAdminAccess(adminAccess);
+					user.setCity(city);
+					user.setEmail(email);
+					user.setPassword(password);
+					user.setRole(role);
+					user.setStatus(status);
+					user.setPhone(phone);
+					rescode = bankingRouter.addUser(user);
+					if(rescode)
+					{
+						logConsole.log(Level.INFO, "Accounts added SuccessFully");
+					}
+					else
+					{
+						logConsole.log(Level.INFO, "Failed to remove Account");
+					}
+				} catch (BMException e) 
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+				}
 				break;
 			}
 			case 3:
 			{
-				AccountsInfo accounts = new AccountsInfo();
-				accounts.setUserId(thisUserId);
-				logConsole.log(Level.INFO, "Enter AccountNumber");
-				long accountNumber = scan.nextInt();
-				accounts.setAccountNumber(accountNumber);
-				logConsole.log(Level.INFO, "Ifsc Code");
-				String ifsc = scan.next();
-				accounts.setIfsc(ifsc);
-				accounts.setStatus("Active");
-				logConsole.log(Level.INFO,"Enter Atm Pin");
-				int atmPin = scan.nextInt();
-				accounts.setAtmPin(atmPin);
-				logConsole.log(Level.INFO, "Enter Account Type");
-				String accountType = scan.next();
-				accounts.setType(accountType);
-				logConsole.log(Level.INFO, "Enter Branch");
-				String branch = scan.next();
-				accounts.setBranch(branch);
-				logConsole.log(Level.INFO, "Enter balance");
-				double balance = scan.nextDouble();
-				accounts.setBalance(balance);
-				boolean rescode = false;
 				try {
+					AccountsInfo accounts = new AccountsInfo();
+					logConsole.log(Level.INFO, "Enter UserId");
+					int accountUserId = scan.nextInt();
+					accounts.setUserId(accountUserId);
+					logConsole.log(Level.INFO, "Enter AccountNumber");
+					long accountNumber = scan.nextInt();
+					accounts.setAccountNumber(accountNumber);
+					logConsole.log(Level.INFO, "Ifsc Code");
+					String ifsc = scan.next();
+					accounts.setIfsc(ifsc);
+					accounts.setStatus("Active");
+					logConsole.log(Level.INFO,"Enter Atm Pin");
+					int atmPin = scan.nextInt();
+					accounts.setAtmPin(atmPin);
+					logConsole.log(Level.INFO, "Enter Account Type");
+					String accountType = scan.next();
+					accounts.setType(accountType);
+					logConsole.log(Level.INFO, "Enter Branch");
+					String branch = scan.next();
+					accounts.setBranch(branch);
+					logConsole.log(Level.INFO, "Enter balance");
+					double balance = scan.nextDouble();
+					accounts.setBalance(balance);
+					boolean rescode = false;
 					rescode = bankingRouter.createAccount(thisUserId, accounts);
-				} catch (BMException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if(rescode)
+					if(rescode)
+					{
+						logConsole.log(Level.INFO, "Accounts added SuccessFully");
+					}
+					else
+					{
+						logConsole.log(Level.INFO, "Failed to remove Account");
+					}
+				} catch (BMException e) 
 				{
-					logConsole.log(Level.INFO, "Accounts added SuccessFully");
-				}
-				else
-				{
-					logConsole.log(Level.INFO, "Failed to remove Account");
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
 			case 4:
 			{
 				boolean status = false;
-				try {
-					status = bankingRouter.removeUser(thisUserId);
-				} catch (BMException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				try
+				{
+					logConsole.log(Level.INFO, "Enter UserId to Remove ");
+					int accountUserId = scan.nextInt();
+					status = bankingRouter.removeUser(accountUserId);
+				}
+				catch (BMException e)
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				if(status)
 				{
@@ -175,17 +215,19 @@ public class AdminPage
 			}
 			case 5:
 			{
-				logConsole.log(Level.INFO, "Enter Account number");
-				int accountNumber = scan.nextInt();
-				double balance = 0;
 				try
 				{
-					balance = bankingRouter.checkBalance(thisUserId,accountNumber);
+					logConsole.log(Level.INFO, "Enter UserId to check balance");
+					int userIdbalance = scan.nextInt();
+					logConsole.log(Level.INFO, "Enter Account number");
+					int accountNumber = scan.nextInt();
+					double balance = 0;
+					balance = bankingRouter.checkBalance(userIdbalance,accountNumber);
 					System.out.println("Your Account Balance is "+balance);
 				}
 				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -201,7 +243,7 @@ public class AdminPage
 				}
 				catch(BMException e)
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -228,7 +270,7 @@ public class AdminPage
 				}
 				catch(BMException e)
 				{
-					e.printStackTrace();
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -254,7 +296,7 @@ public class AdminPage
 				}
 				catch(BMException e)
 				{
-					e.printStackTrace();
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -278,7 +320,7 @@ public class AdminPage
 				}
 				catch(BMException e)
 				{
-					e.printStackTrace();
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -302,7 +344,7 @@ public class AdminPage
 				}
 				catch(BMException e)
 				{
-					e.printStackTrace();
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -319,7 +361,7 @@ public class AdminPage
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -337,7 +379,7 @@ public class AdminPage
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -357,11 +399,11 @@ public class AdminPage
 					{
 						logConsole.log(Level.INFO, "Account Deletion Process Failed");
 					}
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -380,11 +422,11 @@ public class AdminPage
 					{
 						logConsole.log(Level.INFO, " Update Mobile Number Process Failed");
 					}
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -403,11 +445,11 @@ public class AdminPage
 					{
 						logConsole.log(Level.INFO, " Update EmailId Process Failed");
 					}
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -426,11 +468,11 @@ public class AdminPage
 					{
 						logConsole.log(Level.INFO, " Update Aadhar Process Failed");
 					}
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -449,11 +491,11 @@ public class AdminPage
 					{
 						logConsole.log(Level.INFO, " Update name Process Failed");
 					}
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -472,11 +514,11 @@ public class AdminPage
 					{
 						logConsole.log(Level.INFO, " Update role Process Failed");
 					}
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -497,11 +539,11 @@ public class AdminPage
 					{
 						logConsole.log(Level.INFO, " Update password failed Process Failed");
 					}
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -509,7 +551,7 @@ public class AdminPage
 			{
 				logConsole.log(Level.INFO, "Enter Your city : ");
 				String city = scan.next();
-				
+
 				try 
 				{
 					boolean rescode = bankingRouter.changeCity(thisUserId, city);
@@ -521,11 +563,11 @@ public class AdminPage
 					{
 						logConsole.log(Level.INFO, " Update city failed Process Failed");
 					}
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -533,7 +575,7 @@ public class AdminPage
 			{
 				logConsole.log(Level.INFO, "Enter Your type : ");
 				String type = scan.next();
-				
+
 				try 
 				{
 					boolean rescode = bankingRouter.changeType(thisUserId, type);
@@ -545,11 +587,11 @@ public class AdminPage
 					{
 						logConsole.log(Level.INFO, " Update type failed Process Failed");
 					}
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -572,11 +614,11 @@ public class AdminPage
 					{
 						logConsole.log(Level.INFO, " Update Pin Number Process Failed");
 					}
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -586,10 +628,10 @@ public class AdminPage
 				int transactionId = scan.nextInt();
 				try 
 				{
-					TransactionInfo transaction = bankingRouter.getTransaction(transactionId);
+					TransactionInfo transaction = bankingRouter.getTransaction(thisUserId ,transactionId);
 					if(transaction != null)
 					{
-						logConsole.log(Level.INFO, "{0}",transaction);
+						System.out.println(transaction);
 					}
 					else
 					{
@@ -598,7 +640,7 @@ public class AdminPage
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
@@ -611,13 +653,44 @@ public class AdminPage
 					{
 						System.out.println(allTransaction.get(transaction));
 					}
-				} catch (BMException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} catch (BMException e) 
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
 				break;
 			}
 			case 25:
+			{
+				try 
+				{
+					Map<Integer,TransactionInfo> allTransaction = (Map<Integer, TransactionInfo>) bankingRouter.getAllPendingTransaction();
+					for(Integer transaction : allTransaction.keySet())
+					{
+						System.out.println(allTransaction.get(transaction));
+					}
+				} catch (BMException e) 
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+				}
+				break;
+			}
+			case 26:
+			{
+				logConsole.log(Level.INFO, "TransactionId to Reject : ");
+				Integer transactionId = scan.nextInt();
+				try 
+				{
+					bankingRouter.grantApproval(transactionId);
+					System.out.println("Transaction Rejected");
+
+				}
+				catch (BMException e) 
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+				}
+				break;
+			}
+			case 27:
 			{
 				logConsole.log(Level.INFO, "TransactionId to Approve Transaction : ");
 				Integer transactionId = scan.nextInt();
@@ -625,12 +698,36 @@ public class AdminPage
 				{
 					bankingRouter.grantApproval(transactionId);
 					System.out.println("Transaction Approved");
-					
+
 				}
 				catch (BMException e) 
 				{
-					logConsole.log(Level.SEVERE, "{0}",e.getMessage());
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
 				}
+				break;
+			}
+			case 100:
+			{
+				try
+				{
+					bankingRouter.setup();
+				} catch (BMException e) 
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+				}
+				logConsole.log(Level.INFO, "Running Crendence Banking Setup.\n.\n.\n.\n.\n. \nSetup Completed\n");
+				break;
+			}
+			case 150:
+			{
+				try
+				{
+					bankingRouter.saveChanges();
+				} catch (BMException e) 
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+				}
+				logConsole.log(Level.INFO, "Crendence Banking Saving your Changes.\n.\n.\n.\n.\n. \nSave Completed\n");
 				break;
 			}
 			case 0:
@@ -638,13 +735,11 @@ public class AdminPage
 				session = false;
 				break;
 			}
-			default:
-			{
-				logConsole.log(Level.INFO, "Invalid Operation Id");
-				break;
 			}
-			}
+
 		}
 
+
 	}
+
 }

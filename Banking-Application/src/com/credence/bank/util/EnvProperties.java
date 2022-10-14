@@ -26,6 +26,7 @@ public enum EnvProperties
 		envProps.setProperty("username", "root");
 		envProps.setProperty("password", "Root@123");
 		envProps.setProperty("storage", "com.credence.bank.banking.DBBanking");
+//		envProps.setProperty("storage", "com.credence.bank.banking.FBanking");
 		try 
 		{
 			OutputStream writeProps = new FileOutputStream(propsName);

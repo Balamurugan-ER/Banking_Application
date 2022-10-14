@@ -137,6 +137,15 @@ public interface Storage
 	 * @category admin Specific method.
 	 */
 	public void grantApproval(Integer transactionId) throws BMException;
+
+	public Double getBalance(Integer accountNumber) throws BMException;
+
+	public Map<?, ?> getAllPendingTransaction() throws BMException;
+
+	public void rejectTransaction(Integer transactionId) throws BMException;
 	
+	public void reActivateUser(Integer userId) throws BMException;
+	
+	public void reActivateAccount(Integer accountNumber) throws BMException;
 	
 }

@@ -14,10 +14,17 @@ import com.credence.bank.util.BMException;
  * @author Balamurugan
  *
  */
-public interface BankingRouter extends UserRouter
+public interface BankingRouter extends UserRouter //should authenticate and authorise for each methods
 {	
 	public Map<?,?> getAllTransaction()throws BMException;
 	
+	public Map<?, ?> getAllPendingTransaction() throws BMException;
+	
 	public void grantApproval(Integer transactionId)throws BMException;
 	
+	public void rejectTransaction(Integer transactionId) throws BMException;
+	
+	public void reActivateUser(Integer userId) throws BMException;
+	
+	public void reActivateAccount(Integer accountNumber) throws BMException;
 }

@@ -30,7 +30,7 @@ public class UserPage
 		this.thisUserId = userId;
 		scan = scanner;
 		boolean session = false;
-		UserRouter userRouter = BankingRouterProvider.INST;
+		UserRouter userRouter = new BankingRouterProvider(this.thisUserId);
 		UserInfo thisUser = new UserInfo();
 		logConsole.log(Level.INFO,"Welcome User\n"
 				+ "1.Profile Details\n"
@@ -70,12 +70,11 @@ public class UserPage
 			logConsole.log(Level.INFO, "Enter Your Wish : ");
 			try
 			{
-//				operation = Integer.parseInt(scan.next());
-				operation = scan.nextInt();
+				operation = Integer.parseInt(scan.next());
 			}
-			catch(InputMismatchException e)
+			catch(NumberFormatException e)
 			{
-				//logConsole.log(Level.SEVERE, "Invalid input");
+				logConsole.log(Level.SEVERE, "Invalid input");
 			}
 			switch(operation)
 			{
@@ -89,6 +88,10 @@ public class UserPage
 				catch (BMException e) 
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
 				}
 				break;
 			}
@@ -135,6 +138,10 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
 				}
 			}
 			case 3:
@@ -143,64 +150,88 @@ public class UserPage
 				try
 				{
 					status = userRouter.removeUser(thisUserId);
+					if(status)
+					{
+						logConsole.log(Level.INFO, "User Removed SuccessFully");
+					}
+					else
+					{
+						logConsole.log(Level.INFO, "Cannot able to remove User");
+					}
 				}
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
 				}
-				if(status)
+				catch(InputMismatchException e)
 				{
-					logConsole.log(Level.INFO, "User Removed SuccessFully");
-				}
-				else
-				{
-					logConsole.log(Level.INFO, "Cannot able to remove User");
+					throw new BMException("Invalid Input",e);
 				}
 				break;
 			}
 			case 4:
 			{
-				logConsole.log(Level.INFO, "Enter Account number");
-				int accountNumber = scan.nextInt();
-				double balance = 0;
 				try
 				{
+					logConsole.log(Level.INFO, "Enter Account number");
+					int accountNumber = scan.nextInt();
+					double balance = 0;
 					balance = userRouter.checkBalance(thisUserId,accountNumber);
 					System.out.println("Your Account Balance is "+balance);
 				}
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input",e);
 				}
 				break;
 			}
 			case 5:
 			{
-				logConsole.log(Level.INFO, "WithDraw Money\nEnter Your Amount");
-				double amount = scan.nextDouble();
-				logConsole.log(Level.INFO, "Enter Account number");
-				int accountNumber = scan.nextInt();
 				try
 				{
+					logConsole.log(Level.INFO, "WithDraw Money\nEnter Your Amount");
+					double amount = scan.nextDouble();
+					logConsole.log(Level.INFO, "Enter Account number");
+					int accountNumber = scan.nextInt();
 					userRouter.withDraw(thisUserId,accountNumber ,amount);
 				}
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input",e);
 				}
 				break;
 			}
 			case 6:
 			{
-				logConsole.log(Level.INFO, "Self deposit");
-				logConsole.log(Level.INFO, "Enter From Account Number");
-				int fromAccount = scan.nextInt();
-				logConsole.log(Level.INFO, "Enter To Account Number");
-				int toAccount = scan.nextInt();
-				logConsole.log(Level.INFO, "Enter Amount");
-				Double amount = scan.nextDouble();
 				try
 				{
+					logConsole.log(Level.INFO, "Self deposit");
+					logConsole.log(Level.INFO, "Enter From Account Number");
+					int fromAccount = scan.nextInt();
+					logConsole.log(Level.INFO, "Enter To Account Number");
+					int toAccount = scan.nextInt();
+					logConsole.log(Level.INFO, "Enter Amount");
+					Double amount = scan.nextDouble();
 					boolean rescode = userRouter.selfTransfer(thisUserId, fromAccount, toAccount, amount);
 					if(rescode)
 					{
@@ -214,19 +245,27 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input",e);
 				}
 				break;
 			}
 			case 7:
 			{
-				logConsole.log(Level.INFO, "Enter From Account Number");
-				int fromAccount = scan.nextInt();
-				logConsole.log(Level.INFO, "Enter To Account Number");
-				int toAccount = scan.nextInt();
-				logConsole.log(Level.INFO, "Enter Amount");
-				Double amount = scan.nextDouble();
 				try
 				{
+					logConsole.log(Level.INFO, "Enter From Account Number");
+					int fromAccount = scan.nextInt();
+					logConsole.log(Level.INFO, "Enter To Account Number");
+					int toAccount = scan.nextInt();
+					logConsole.log(Level.INFO, "Enter Amount");
+					Double amount = scan.nextDouble();
 					boolean rescode = userRouter.othersTransfer(thisUserId, fromAccount, toAccount, amount);
 					if(rescode)
 					{
@@ -240,17 +279,25 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input",e);
 				}
 				break;
 			}
 			case 8:
 			{
-				logConsole.log(Level.INFO, "Enter Account Number");
-				int account = scan.nextInt();
-				logConsole.log(Level.INFO, "Enter Amount");
-				Double amount = scan.nextDouble();
 				try
 				{
+					logConsole.log(Level.INFO, "Enter Account Number");
+					int account = scan.nextInt();
+					logConsole.log(Level.INFO, "Enter Amount");
+					Double amount = scan.nextDouble();
 					boolean rescode = userRouter.selfDeposit(thisUserId, account, amount);
 					if(rescode)
 					{
@@ -264,17 +311,25 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input",e);
 				}
 				break;
 			}
 			case 9:
 			{
-				logConsole.log(Level.INFO, "Enter Account Number");
-				int account = scan.nextInt();
-				logConsole.log(Level.INFO, "Enter Amount");
-				Double amount = scan.nextDouble();
 				try
 				{
+					logConsole.log(Level.INFO, "Enter Account Number");
+					int account = scan.nextInt();
+					logConsole.log(Level.INFO, "Enter Amount");
+					Double amount = scan.nextDouble();
 					boolean rescode = userRouter.othersDeposit(account, amount);
 					if(rescode)
 					{
@@ -288,6 +343,14 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input",e);
 				}
 				break;
 			}
@@ -305,15 +368,20 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
 				}
+				
 				break;
 			}
 			case 11:
 			{
-				logConsole.log(Level.INFO, "Enter Your AccountNumber : ");
-				Integer accountNumber = scan.nextInt();
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your AccountNumber : ");
+					Integer accountNumber = scan.nextInt();
 					AccountsInfo account = userRouter.getMyAccountInfo(thisUserId, accountNumber);
 					if(account != null)
 					{
@@ -323,15 +391,23 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 12:
 			{
-				logConsole.log(Level.INFO, "Enter Your AccountNumber : ");
-				Integer accountNumber = scan.nextInt();
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your AccountNumber : ");
+					Integer accountNumber = scan.nextInt();
 					AccountsInfo account = userRouter.getMyAccountInfo(thisUserId, accountNumber);
 					boolean rescode = userRouter.closeAccount(thisUserId, account);
 					if(rescode)
@@ -347,15 +423,23 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 13:
 			{
-				logConsole.log(Level.INFO, "Enter Your Phone number : ");
-				Integer phone = scan.nextInt();
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your Phone number : ");
+					Integer phone = scan.nextInt();
 					boolean rescode = userRouter.updateMobileNumber(thisUserId, phone);
 					if(rescode)
 					{
@@ -370,15 +454,23 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 14:
 			{
-				logConsole.log(Level.INFO, "Enter Your EmailId : ");
-				String email = scan.next();
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your EmailId : ");
+					String email = scan.next();
 					boolean rescode = userRouter.updateEmail(thisUserId, email);
 					if(rescode)
 					{
@@ -393,15 +485,23 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 15:
 			{
-				logConsole.log(Level.INFO, "Enter Your AadharNumber : ");
-				int aadhar = scan.nextInt();
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your AadharNumber : ");
+					int aadhar = scan.nextInt();
 					boolean rescode = userRouter.updateAadhar(thisUserId, aadhar);
 					if(rescode)
 					{
@@ -416,15 +516,23 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 16:
 			{
-				logConsole.log(Level.INFO, "Enter Your Name : ");
-				String name = scan.next();
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your Name : ");
+					String name = scan.next();
 					boolean rescode = userRouter.updateName(thisUserId, name);
 					if(rescode)
 					{
@@ -439,15 +547,23 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 17:
 			{
-				logConsole.log(Level.INFO, "Enter Your Role : ");
-				String role = scan.next();
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your Role : ");
+					String role = scan.next();
 					boolean rescode = userRouter.updateRole(thisUserId, role);
 					if(rescode)
 					{
@@ -462,17 +578,25 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 18:
 			{
-				logConsole.log(Level.INFO, "Enter Your oldPassword : ");
-				String oldPassword = scan.next();
-				logConsole.log(Level.INFO, "Enter Your newPassword : ");
-				String newPassword = scan.next();
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your oldPassword : ");
+					String oldPassword = scan.next();
+					logConsole.log(Level.INFO, "Enter Your newPassword : ");
+					String newPassword = scan.next();
 					boolean rescode = userRouter.updatePassword(thisUserId, oldPassword,newPassword);
 					if(rescode)
 					{
@@ -487,16 +611,23 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 19:
-			{
-				logConsole.log(Level.INFO, "Enter Your city : ");
-				String city = scan.next();
-				
+			{				
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your city : ");
+					String city = scan.next();
 					boolean rescode = userRouter.changeCity(thisUserId, city);
 					if(rescode)
 					{
@@ -511,16 +642,24 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 20:
 			{
-				logConsole.log(Level.INFO, "Enter Your type : ");
-				String type = scan.next();
 				
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your type : ");
+					String type = scan.next();
 					boolean rescode = userRouter.changeType(thisUserId, type);
 					if(rescode)
 					{
@@ -535,19 +674,27 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 21:
 			{
-				logConsole.log(Level.INFO, "Enter Your AccountNumber : ");
-				int accountNumber = scan.nextInt();
-				logConsole.log(Level.INFO, "Enter Your old AtmPin : ");
-				int oldAtmPin = scan.nextInt();
-				logConsole.log(Level.INFO, "Enter Your new AtmPin : ");
-				int newAtmPin = scan.nextInt();
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your AccountNumber : ");
+					int accountNumber = scan.nextInt();
+					logConsole.log(Level.INFO, "Enter Your old AtmPin : ");
+					int oldAtmPin = scan.nextInt();
+					logConsole.log(Level.INFO, "Enter Your new AtmPin : ");
+					int newAtmPin = scan.nextInt();
 					boolean rescode = userRouter.changeAtmPin(userId, accountNumber,oldAtmPin,newAtmPin);
 					if(rescode)
 					{
@@ -562,15 +709,23 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}
 			case 22:
 			{
-				logConsole.log(Level.INFO, "Enter Your TransactionId : ");
-				int transactionId = scan.nextInt();
 				try 
 				{
+					logConsole.log(Level.INFO, "Enter Your TransactionId : ");
+					int transactionId = scan.nextInt();
 					TransactionInfo transaction = userRouter.getTransaction(thisUserId,transactionId);
 					if(transaction != null)
 					{
@@ -584,6 +739,14 @@ public class UserPage
 				catch(BMException e)
 				{
 					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
 				}
 				break;
 			}

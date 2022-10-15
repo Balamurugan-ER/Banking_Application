@@ -14,12 +14,12 @@ import com.credence.bank.util.Utilities;
  * @author Balamurugan
  *
  */
-public class Authentication implements Cloneable
+public class Authentication
 {
 	private  long loginSessionTime;
 	private boolean admin;
 	private int userID;
-	public boolean login(Integer userId,String email, String password) throws BMException 
+	private void validate(Integer userId,String email, String password,UserInfo user) throws BMException
 	{
 		Utilities.INST.isNull(userId);
 		boolean emailVerification = Utilities.INST.isEmail(email);
@@ -32,58 +32,73 @@ public class Authentication implements Cloneable
 		{
 			throw new BMException("Invalid password");
 		}
-		Storage banking = Utilities.INST.getStorage();
-		UserInfo user = banking.getUserInfo(userId);
 		if(user == null)
 		{
 			throw new BMException("User not found");
 		}
-		String orgEmail = user.getEmail();
-		String orgPassword = user.getPassword();
-		int orgUserId = user.getUserId();
-		String status = user.getStatus();
 		String adminAccess = user.getAdminAccess();
 		if(adminAccess.equals("admin"))
 		{
-			this.isAdmin();
+			this.validateAdmin();
 		}
+		String status = user.getStatus();
 		if(status.equals("Inactive"))
 		{
 			throw new BMException("InActive User Found Contact Administrator");
 		}
-		if(email.equals(orgEmail) 
-				&& password.equals(orgPassword) 
+
+	}
+	public boolean login(Integer userId,String email, String password) throws BMException 
+	{
+		Storage banking = Utilities.INST.getStorage();
+		UserInfo user = banking.getUserInfo(userId);
+		String orgEmail = user.getEmail();
+		String orgPassword = user.getPassword();
+		int orgUserId = user.getUserId();
+		String adminAccess = user.getAdminAccess();
+		validate(userId, email, password, user);
+		if(email.equals(orgEmail) && password.equals(orgPassword) 
 				&& userId.equals(orgUserId))
 		{
 			this.userID = userId;
-			this.authenticated(userId,adminAccess);
+			this.addSession(userId,adminAccess);
 			return true;
 		}
 		return false;
 	}
-	private void authenticated(Integer userId,String role) throws BMException
+	private void addSession(Integer userId,String adminAccess) throws BMException
 	{
 		this.loginSessionTime = System.currentTimeMillis();
 		SessionInfo session = new SessionInfo();
 		session.setTime(loginSessionTime);
 		session.setUserId(this.userID);
-		session.setRole(role);
+		session.setRole(adminAccess);
 		Session.INST.addEntry(this.userID, session);
 	}
-	public boolean isAdmin()
+	public void validateAdmin()
 	{
 		this.admin = true;
-		return this.admin;
 	}
-	public boolean isAuthenticated() throws BMException
+	public boolean isAdmin(int userId)
 	{
-		long difference = 300000;
+		return Session.INST.isAdmin(userId);
+	}
+	public boolean isAuthenticated(int userId) throws BMException
+	{
+		SessionInfo session = Session.INST.getEntryAuth(userId);
+		long loginTime = session.getTime();
+		doAuthentication(loginTime);
+		session.setTime(System.currentTimeMillis());
+		return true;
+	}
+	private void doAuthentication(long loginTime) throws BMException
+	{
+		long difference = 60000;
 		long currentTime = System.currentTimeMillis();
-		if(currentTime - this.loginSessionTime > difference)
+		if(currentTime - loginTime > difference)
 		{
 			throw new BMException("Session Time Expired Login Again");
 		}
-		return true;
 	}
 	
 }

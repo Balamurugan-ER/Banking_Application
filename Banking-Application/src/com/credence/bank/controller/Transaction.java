@@ -29,7 +29,6 @@ public interface Transaction
 		{
 			return this.transactionType;
 		}
-		
 	}
 	/**
 	 * 

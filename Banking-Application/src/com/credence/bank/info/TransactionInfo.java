@@ -3,8 +3,6 @@
  */
 package com.credence.bank.info;
 
-import java.sql.Timestamp;
-
 /**
  * @author Balamurugan
  *

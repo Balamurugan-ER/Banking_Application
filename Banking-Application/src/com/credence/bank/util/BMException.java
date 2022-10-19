@@ -3,8 +3,6 @@
  */
 package com.credence.bank.util;
 
-import java.sql.SQLException;
-
 /**
  * @author Balamurugan
  *

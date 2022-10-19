@@ -3,8 +3,6 @@
  */
 package com.credence.bank.routes;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import com.credence.bank.authentication.Authentication;
@@ -12,12 +10,10 @@ import com.credence.bank.banking.Storage;
 import com.credence.bank.controller.Transaction;
 import com.credence.bank.controller.TransactionRouter;
 import com.credence.bank.info.AccountsInfo;
-import com.credence.bank.info.SessionInfo;
 import com.credence.bank.info.TransactionInfo;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.util.BMException;
-import com.credence.bank.util.EnvProperties;
-import com.credence.bank.util.Session;
+import com.credence.bank.util.Credence;
 import com.credence.bank.util.Utilities;
 
 /**
@@ -26,62 +22,7 @@ import com.credence.bank.util.Utilities;
  */
 public class BankingRouterProvider implements BankingRouter
 {
-	public enum AccountType
-	{
-		SAVINGS("savings"),
-		CURRENT("current");
-		private String accountType;
-		private AccountType(String accountType)
-		{
-			this.accountType = accountType;
-		}
-		public String getAccountTypeChoice()
-		{
-			return this.accountType;
-		}
-	}
-	public enum Role
-	{
-		CUSTOMER("customer"),
-		EMPLOYEE("employee");
-		private String role;
-		private Role(String role)
-		{
-			this.role = role;
-		}
-		public String getRole()
-		{
-			return this.role;
-		}
-	}
-	public enum Ifsc
-	{
-		KK123OPQ("KK123OPQ"),
-		ABM190QAZ("ABM190QAZ");
-		private String ifsc;
-		private Ifsc(String ifsc)
-		{
-			this.ifsc = ifsc;
-		}
-		public String getIfsc()
-		{
-			return this.ifsc;
-		}
-	}
-	public enum Access
-	{
-		USER("user"),
-		ADMIN("admin");
-		private String access;
-		private Access(String access)
-		{
-			this.access = access;
-		}
-		public String getAccess()
-		{
-			return this.access;
-		}
-	}
+	
 	public BankingRouterProvider(int userId) 
 	{
 		this.userId = userId;
@@ -145,7 +86,7 @@ public class BankingRouterProvider implements BankingRouter
 		Utilities.INST.isNull(userId);
 		UserInfo user = getProfileInfo(userId);
 		String access = user.getAdminAccess();
-		if(access.equals("user"))
+		if(access.equals(Credence.Access.USER.getAccess()))
 		{
 			banking = getStorage();
 			banking.removeUser(userId);
@@ -179,8 +120,8 @@ public class BankingRouterProvider implements BankingRouter
 		newTransaction.setSenderAccountNumber(fromAccountNumber);
 		newTransaction.setUserId(userId);
 		newTransaction.setTime(System.currentTimeMillis());
-		newTransaction.setStatus("Pending");
-		newTransaction.setType("moneyTransfer");
+		newTransaction.setStatus(Credence.Status.PENDING.getStatus());
+		newTransaction.setType(Credence.TransactionType.MONEYTRANSFER.getType());
 		addTransaction(newTransaction);
 		return true;
 	}
@@ -200,8 +141,8 @@ public class BankingRouterProvider implements BankingRouter
 		newTransaction.setSenderAccountNumber(toAccountNumber);
 		newTransaction.setUserId(userId);
 		newTransaction.setTime(System.currentTimeMillis());
-		newTransaction.setStatus("Pending");
-		newTransaction.setType("moneyTransfer");
+		newTransaction.setStatus(Credence.Status.PENDING.getStatus());
+		newTransaction.setType(Credence.TransactionType.MONEYTRANSFER.getType());
 		addTransaction(newTransaction);
 		return true;
 	}
@@ -220,8 +161,8 @@ public class BankingRouterProvider implements BankingRouter
 		newTransaction.setSenderAccountNumber(accountNumber);
 		newTransaction.setUserId(userId);
 		newTransaction.setTime(System.currentTimeMillis());
-		newTransaction.setStatus("Pending");
-		newTransaction.setType("selfDeposit");
+		newTransaction.setStatus(Credence.Status.PENDING.getStatus());
+		newTransaction.setType(Credence.TransactionType.SELFDEPOSIT.getType());
 		addTransaction(newTransaction);
 		return true;
 	}
@@ -238,10 +179,10 @@ public class BankingRouterProvider implements BankingRouter
 		newTransaction.setAmount(amount);
 		newTransaction.setReceiverAccountNumber(accountNumber);
 		newTransaction.setSenderAccountNumber(accountNumber);
-		newTransaction.setUserId(1000);
+		newTransaction.setUserId(null);
 		newTransaction.setTime(System.currentTimeMillis());
-		newTransaction.setStatus("Pending");
-		newTransaction.setType("otherDeposit");
+		newTransaction.setStatus(Credence.Status.PENDING.getStatus());
+		newTransaction.setType(Credence.TransactionType.OTHERDEPOSIT.getType());
 		addTransaction(newTransaction);
 		return true;
 	}
@@ -405,8 +346,8 @@ public class BankingRouterProvider implements BankingRouter
 		newTransaction.setSenderAccountNumber(accountNumber);
 		newTransaction.setUserId(userId);
 		newTransaction.setTime(System.currentTimeMillis());
-		newTransaction.setStatus("Pending");
-		newTransaction.setType("withDraw");
+		newTransaction.setStatus(Credence.Status.PENDING.getStatus());
+		newTransaction.setType(Credence.TransactionType.WITHDRAW.getType());
 		addTransaction(newTransaction);
 		return true;
 	}
@@ -415,6 +356,7 @@ public class BankingRouterProvider implements BankingRouter
 	{
 		this.isAuthenticated();
 		Utilities.INST.isNull(transactionInfo);
+		banking = getStorage();
 		double amount = transactionInfo.getAmount();
 		Integer accountNum = transactionInfo.getSenderAccountNumber();
 		double curentBalance = banking.getBalance(accountNum);
@@ -433,7 +375,7 @@ public class BankingRouterProvider implements BankingRouter
 		String access = user.getAdminAccess();
 		TransactionInfo myTransaction = transaction.getTransaction(transactionId);
 		Integer transUserId = myTransaction.getUserId();
-		if(access.equals("admin") || userId == transUserId)
+		if(access.equals(Credence.Access.ADMIN.getAccess()) || userId == transUserId)
 		{
 			return myTransaction;
 		}
@@ -461,12 +403,14 @@ public class BankingRouterProvider implements BankingRouter
 	public void setup() throws BMException 
 	{
 		this.isAuthenticated();
+		banking = getStorage();
 		banking.setup();
 	}
 	@Override
 	public void saveChanges() throws BMException 
 	{
 		this.isAuthenticated();
+		banking = getStorage();
 		banking.saveChanges();
 	}
 	@Override
@@ -485,20 +429,58 @@ public class BankingRouterProvider implements BankingRouter
 		transaction.rejectTransaction(transactionId);
 	}
 	@Override
-	public void reActivateUser(Integer userId) throws BMException 
+	public void reActivateUser(Integer userId,Integer requestId) throws BMException 
 	{
 		this.isAuthenticated();
 		this.isAdmin();
 		Utilities.INST.isNull(userId);
+		banking = getStorage();
+		banking.setRequestFlag(Credence.Status.ACTIVE,requestId);
 		banking.reActivateUser(userId);
 	}
 	@Override
-	public void reActivateAccount(Integer accountNumber) throws BMException 
+	public void reActivateAccount(Integer accountNumber,Integer requestId) throws BMException 
 	{
 		this.isAuthenticated();
 		this.isAdmin();
 		Utilities.INST.isNull(accountNumber);
+		banking = getStorage();
+		banking.setRequestFlag(Credence.Status.ACTIVE,requestId);
 		banking.reActivateAccount(accountNumber);
+	}
+	@Override
+	public Map<?,?> getAllUserTransaction(Integer userId) throws BMException 
+	{
+		this.isAuthenticated();
+		banking = getStorage();
+		Utilities.INST.isNull(userId);
+		return banking.getAllUserTransaction(userId);
+	}
+	@Override
+	public void reActivateAccountRequest(Integer userId, Integer accountNumber) throws BMException 
+	{
+		banking = getStorage();
+		this.isAuthenticated();
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(userId);
+		banking.reActivateAccountRequest(userId, accountNumber);
+		
+	}
+	@Override
+	public void reActivateUserRequest(Integer userId) throws BMException 
+	{
+		banking = getStorage();
+		Utilities.INST.isNull(userId);
+		banking.reActivateUserRequest(userId);
+		
+	}
+	@Override
+	public Map<?, ?> getAllRequests() throws BMException 
+	{
+		this.isAuthenticated();
+		this.isAdmin();
+		banking = getStorage();
+		return banking.getAllRequest();
 	}
 	
 } 

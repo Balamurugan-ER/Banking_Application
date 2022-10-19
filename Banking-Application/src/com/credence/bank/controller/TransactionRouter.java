@@ -8,6 +8,7 @@ import java.util.Map;
 import com.credence.bank.banking.Storage;
 import com.credence.bank.info.TransactionInfo;
 import com.credence.bank.util.BMException;
+import com.credence.bank.util.Credence;
 import com.credence.bank.util.Utilities;
 
 /**
@@ -62,15 +63,15 @@ public class TransactionRouter implements Transaction
 		int senderAccountNumber = thisTransaction.getSenderAccountNumber();
 		if(status.equals("Approved"))
 		{
-			if(type.equals(TransactionType.SELFDEPOSIT.getType()))
+			if(type.equals(Credence.TransactionType.SELFDEPOSIT.getType()))
 			{
 				banking.selfDeposit(userId, receiverAccountNumber, amount);
 			}
-			if(type.equals(TransactionType.OTHERDEPOSIT.getType()))
+			if(type.equals(Credence.TransactionType.OTHERDEPOSIT.getType()))
 			{
 				banking.otherDeposit(receiverAccountNumber, amount);
 			}
-			if(type.equals(TransactionType.WITHDRAW.getType()))
+			if(type.equals(Credence.TransactionType.WITHDRAW.getType()))
 			{
 				Double curentBalance = banking.getBalance(userId, receiverAccountNumber);
 				if(curentBalance < amount)
@@ -79,7 +80,7 @@ public class TransactionRouter implements Transaction
 				}
 				banking.withDraw(userId, receiverAccountNumber, amount);
 			}
-			if(type.equals(TransactionType.MONEYTRANSFER.getType()))
+			if(type.equals(Credence.TransactionType.MONEYTRANSFER.getType()))
 			{
 				banking.moneyTransfer(userId, senderAccountNumber, receiverAccountNumber, amount);
 			}

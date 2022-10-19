@@ -89,4 +89,10 @@ public boolean addUser(UserInfo userInfo) throws BMException;
 	public void addTransaction(TransactionInfo transactionInfo) throws BMException;
 	
 	public TransactionInfo getTransaction(Integer userId,Integer transactionId) throws BMException;
+	
+	public Map<?,?> getAllUserTransaction(Integer userId) throws BMException;
+	
+	public void reActivateUserRequest(Integer userId) throws BMException;
+	
+	public void reActivateAccountRequest(Integer userId,Integer accountNumber) throws BMException;
 }

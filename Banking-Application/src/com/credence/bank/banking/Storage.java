@@ -12,6 +12,7 @@ import com.credence.bank.info.TransactionInfo;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.routes.BankingRouter;
 import com.credence.bank.util.BMException;
+import com.credence.bank.util.Credence;
 import com.credence.bank.util.Utilities;
 
 /**
@@ -131,6 +132,7 @@ public interface Storage
 	public Map<?,?> getAllTransaction() throws BMException;
 	
 	/**
+	 * Grant Approval for given transaction id
 	 * @category approving users request.
 	 * @param requestId
 	 * @throws BMException 
@@ -138,14 +140,72 @@ public interface Storage
 	 */
 	public void grantApproval(Integer transactionId) throws BMException;
 
+	/**
+	 * 
+	 * @param accountNumber
+	 * @return Balance
+	 * @throws BMException
+	 */
 	public Double getBalance(Integer accountNumber) throws BMException;
 
+	/**
+	 * 
+	 * @return Map<Integer,TransactionInfo>
+	 * @throws BMException
+	 */
 	public Map<?, ?> getAllPendingTransaction() throws BMException;
 
+	/**
+	 * 
+	 * @param transactionId
+	 * @throws BMException
+	 */
 	public void rejectTransaction(Integer transactionId) throws BMException;
-	
+	/**
+	 * 
+	 * @param userId
+	 * @throws BMException
+	 */
 	public void reActivateUser(Integer userId) throws BMException;
-	
+	/**
+	 * 
+	 * @param accountNumber
+	 * @throws BMException
+	 */
 	public void reActivateAccount(Integer accountNumber) throws BMException;
+	/**
+	 * 
+	 * @param userId
+	 * @throws BMException
+	 */
+	public void reActivateUserRequest(Integer userId) throws BMException;
+	/**
+	 * 
+	 * @param userId
+	 * @param accountNumber
+	 * @throws BMException
+	 */
+	public void reActivateAccountRequest(Integer userId,Integer accountNumber) throws BMException;
 	
+	/**
+	 * 
+	 * @param userId
+	 * @return Map<Integer,Transaction>
+	 * @throws BMException
+	 */
+	public Map<?,?> getAllUserTransaction(Integer userId) throws BMException;
+	
+	/**
+	 * 
+	 * @return Map<Integer,RequestsInfo>
+	 * @throws BMException
+	 */
+	public Map<?,?> getAllRequest() throws BMException;
+	
+	/**
+	 * 
+	 * @param status
+	 * @throws BMException
+	 */
+	public void setRequestFlag(Credence.Status status,Integer id) throws BMException;
 }

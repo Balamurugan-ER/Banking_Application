@@ -12,9 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.credence.bank.info.AccountsInfo;
+import com.credence.bank.info.RequestInfo;
 import com.credence.bank.info.TransactionInfo;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.util.BMException;
+import com.credence.bank.util.Credence;
 import com.credence.bank.util.EnvProperties;
 import com.credence.bank.util.Utilities;
 
@@ -48,7 +50,10 @@ public class DBBanking implements Storage
 	{
 		try 
 		{
-			connection.close();
+			if(connection != null)
+			{
+				connection.close();
+			}
 		}
 		catch (SQLException e) 
 		{
@@ -510,7 +515,7 @@ public class DBBanking implements Storage
 	@Override
 	public void removeUser(Integer userId) throws BMException 
 	{
-		changeProfileInfo(userId, "Status", "Inactive");
+		changeProfileInfo(userId, "Status", Credence.Status.INACTIVE.getStatus());
 	}
 	@Override
 	public void createAccount(Integer userId, AccountsInfo accountsInfo) throws BMException 
@@ -550,7 +555,7 @@ public class DBBanking implements Storage
 		Connection connection = getConnection();
 		try (PreparedStatement preparedStatement = connection.prepareStatement(query))
 		{
-			preparedStatement.setString(1, "Inactive");
+			preparedStatement.setString(1, Credence.Status.INACTIVE.getStatus());
 			preparedStatement.setLong(2, accountsInfo.getAccountNumber());
 			preparedStatement.setInt(3, accountsInfo.getUserId());
 			preparedStatement.execute();
@@ -729,7 +734,7 @@ public class DBBanking implements Storage
 		}
 		catch (SQLException e) 
 		{
-			throw new BMException("Failed To Approve Transaction status",e);
+			throw new BMException("Failed To get all Transactions",e);
 		}
 		finally
 		{
@@ -769,7 +774,7 @@ public class DBBanking implements Storage
 		}
 		catch (SQLException e) 
 		{
-			throw new BMException("Failed To Approve Transaction status",e);
+			throw new BMException("Failed To get all Transactions",e);
 		}
 		finally
 		{
@@ -816,12 +821,16 @@ public class DBBanking implements Storage
 		Connection connection = getConnection();
 		try(PreparedStatement reActiveQuery = connection.prepareStatement(query))
 		{
-			reActiveQuery.setString(1, "Active");
+			reActiveQuery.setString(1, Credence.Status.APPROVED.getStatus());
 			reActiveQuery.setInt(2, userId);
 			
 		} catch (SQLException e) 
 		{
 			throw new BMException("Failed to reactive user",e);
+		}
+		finally
+		{
+			closeConnection(connection);
 		}
 	}
 	@Override
@@ -832,13 +841,166 @@ public class DBBanking implements Storage
 		Connection connection = getConnection();
 		try(PreparedStatement reActiveQuery = connection.prepareStatement(query))
 		{
-			reActiveQuery.setString(1, "Active");
+			reActiveQuery.setString(1, Credence.Status.APPROVED.getStatus());
 			reActiveQuery.setInt(2, accountNumber);
 			
 		} catch (SQLException e) 
 		{
-			throw new BMException("Failed to reactive user",e);
+			throw new BMException("Failed to reactive user Credence Account",e);
+		}
+		finally
+		{
+			closeConnection(connection);
 		}
 	}
+	@Override
+	public void reActivateUserRequest(Integer userId) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		String reActiveUserRequestQuery = "INSERT INTO Request (UserId,Type,Status) VALUES (?,?,?)";
+		Connection connection = getConnection();
+		try(PreparedStatement reActivateUser = connection.prepareStatement(reActiveUserRequestQuery))
+		{
+			reActivateUser.setInt(1, userId);
+			reActivateUser.setString(2, Credence.RequestType.REACTIVATEUSER.getRequest());
+			reActivateUser.setString(3, Credence.Status.PENDING.getStatus());
+			reActivateUser.execute();
+			
+		} 
+		catch (SQLException e) 
+		{
+			throw new BMException("Failed to Request reactive user",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+		
+	}
+	@Override
+	public void reActivateAccountRequest(Integer userId,Integer accountNumber) throws BMException 
+	{
+		
+		Utilities.INST.isNull(accountNumber);
+		Utilities.INST.isNull(userId);
+		String reActiveAccountRequest = "INSERT INTO Request (UserId,Type,Status,AccountNumber) VALUES (?,?,?,?)";
+		Connection connection = getConnection();
+		try(PreparedStatement reActivateAccountRequest = connection.prepareStatement(reActiveAccountRequest))
+		{
+			reActivateAccountRequest.setInt(1, userId);
+			reActivateAccountRequest.setString(2, Credence.RequestType.REACTIVATEACCOUNT.getRequest());
+			reActivateAccountRequest.setString(3, Credence.Status.PENDING.getStatus());
+			reActivateAccountRequest.setInt(4, accountNumber);
+			reActivateAccountRequest.execute();
+			
+		} 
+		catch (SQLException e) 
+		{
+			throw new BMException("Failed to Request reactive Credence Account",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+	}
+	@Override
+	public Map<?,?> getAllUserTransaction(Integer userId) throws BMException 
+	{
+		Utilities.INST.isNull(userId);
+		String getAllUserTransaction = "SELECT * FROM Transaction WHERE UserId = ?";
+		Connection connection = getConnection();
+		Map<Integer,TransactionInfo> userTransaction = new HashMap<>();
+		try(PreparedStatement getAllUserTransactionRequest = connection.prepareStatement(getAllUserTransaction))
+		{
+			getAllUserTransactionRequest.setInt(1, userId);
+			boolean rescode = getAllUserTransactionRequest.execute();
+			if(rescode)
+			{
+				try(ResultSet result = getAllUserTransactionRequest.getResultSet())
+				{
+					while(result.next())
+					{
+						TransactionInfo transaction = new TransactionInfo();
+						transaction.setTransactionId(result.getInt(1));
+						transaction.setUserId(result.getInt(2));
+						transaction.setSenderAccountNumber(result.getInt(3));
+						transaction.setReceiverAccountNumber(result.getInt(4));
+						transaction.setAmount(result.getDouble(5));
+						transaction.setTime(result.getLong(6));
+						transaction.setStatus(result.getString(7));
+						transaction.setType(result.getString(8));
+						userTransaction.put(transaction.getTransactionId(), transaction);
+					}
+				}
+			}
+			return  userTransaction;
+		} 
+		catch (SQLException e) 
+		{
+			throw new BMException("Failed to get all Transaction ",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+	}
+	@Override
+	public Map<?, ?> getAllRequest() throws BMException 
+	{
+		String getAllRequestQuery = "SELECT * FROM Request";
+		Connection connection = getConnection();
+		Map<Integer,RequestInfo> allRequests = new HashMap<>();
+		try(PreparedStatement getAllRequest = connection.prepareStatement(getAllRequestQuery))
+		{
+			boolean rescode = getAllRequest.execute();
+			if(rescode)
+			{
+				try(ResultSet result = getAllRequest.getResultSet())
+				{
+					while(result.next())
+					{
+						RequestInfo request = new RequestInfo();
+						request.setId(result.getInt(1));
+						request.setUserId(result.getInt(2));
+						request.setType(result.getString(3));
+						request.setStatus(result.getString(4));
+						request.setAccountNumber(result.getInt(5));
+						allRequests.put(request.getId(), request);
+					}
+				}
+			}
+			return  allRequests;
+		} 
+		catch (SQLException e) 
+		{
+			throw new BMException("Failed to get All requests",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+	}
+	@Override
+	public void setRequestFlag(Credence.Status status,Integer requestId) throws BMException 
+	{
+		
+		String setRequestFlag = "UPDATE Request SET Status = ? WHERE Id =?";
+		Connection connection = getConnection();
+		try(PreparedStatement setRequestFlagStatement = connection.prepareStatement(setRequestFlag))
+		{
+			setRequestFlagStatement.setString(1, status.getStatus());
+			setRequestFlagStatement.setInt(2, requestId);
+			setRequestFlagStatement.execute();
+		} 
+		catch (SQLException e) 
+		{
+			throw new BMException("Failed to set Status At Request",e);
+		}
+		finally
+		{
+			closeConnection(connection);
+		}
+	}
+	
 
 }

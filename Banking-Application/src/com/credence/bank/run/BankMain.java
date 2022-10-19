@@ -13,6 +13,7 @@ import com.credence.bank.authentication.Authentication;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.routes.*;
 import com.credence.bank.util.BMException;
+import com.credence.bank.util.Credence;
 
 /**
  * @author Balamurugan
@@ -53,11 +54,11 @@ public class BankMain
 			String adminAccess = currentUser.getAdminAccess();
 			if(authenticated)
 			{
-				if(adminAccess.equals("user"))
+				if(adminAccess.equals(Credence.Access.USER.getAccess()))
 				{
 					admin = false;
 				}
-				if(adminAccess.equals("admin"))
+				if(adminAccess.equals(Credence.Access.ADMIN.getAccess()))
 				{
 					admin = true;
 				}
@@ -78,7 +79,21 @@ public class BankMain
 		return authenticated;
 
 	}
-	
+	private void activateUser() throws BMException
+	{
+		logConsole.log(Level.INFO, "To ReActivate your user Account \nEnter UserId : ");
+		try
+		{
+			int userId = Integer.parseInt(scanner.next());
+			UserRouter user = new BankingRouterProvider(userId);
+			user.reActivateUserRequest(userId);
+			System.out.println("Your Will be Reactivated Soon....");
+		}
+		catch(NumberFormatException e)
+		{
+			throw new BMException("Invalid Input",e);
+		}		
+	}
 	public static void main(String[] args) 
 	{
 		BankMain banking = new BankMain();
@@ -109,6 +124,18 @@ public class BankMain
 			{
 				main(null);
 			}
-		}		
+			if(message.equals("InActive User Found Contact Administrator"))
+			{
+				try 
+				{
+					banking.activateUser();
+				}
+				catch (BMException e1) 
+				{
+					e1.printStackTrace();
+				}
+			}
+		}	
+		
 	}
 }

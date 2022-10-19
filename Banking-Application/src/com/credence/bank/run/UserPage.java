@@ -55,6 +55,8 @@ public class UserPage
 				+ "20.change Type\n"
 				+ "21.change AtmPin\n"
 				+ "22.Check Transaction Information\n"
+				+ "23.Get All my Transcation List\n"
+				+ "24.ReActivate Bank Account Request\n"
 				+ "0.Exit\n"
 				+ "100.Setup Install\n"
 				+ "150.Save Changes\n");
@@ -735,6 +737,49 @@ public class UserPage
 					{
 						logConsole.log(Level.INFO, "Fetching TransactionInfo Process Failed ");
 					}
+				}
+				catch(BMException e)
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input");
+				}
+				break;
+			}
+			case 23:
+			{
+				try
+				{
+					Map<Integer,TransactionInfo> myTransaction = (Map<Integer, TransactionInfo>) userRouter.getAllUserTransaction(userId);
+					for(Integer transaction : myTransaction.keySet())
+					{
+						System.out.println("------------Your Transactions-----------");
+						System.out.println(myTransaction.get(transaction));
+					}
+				}
+				catch(BMException e)
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				break;
+			}
+			case 24:
+			{
+				try
+				{
+					logConsole.log(Level.INFO, "Enter Your AccountNumber to Send Reactivate : ");
+					int accountNumber = scan.nextInt();
+					userRouter.reActivateAccountRequest(this.thisUserId, accountNumber);
 				}
 				catch(BMException e)
 				{

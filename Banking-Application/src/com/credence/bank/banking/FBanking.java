@@ -17,6 +17,7 @@ import com.credence.bank.info.AccountsInfo;
 import com.credence.bank.info.TransactionInfo;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.util.BMException;
+import com.credence.bank.util.Credence.Status;
 import com.credence.bank.util.Utilities;
 
 /**
@@ -399,5 +400,32 @@ public class FBanking implements Storage
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public void reActivateUserRequest(Integer userId) throws BMException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void reActivateAccountRequest(Integer userId, Integer accountNumber) throws BMException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public Map<?, ?> getAllUserTransaction(Integer userId) throws BMException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public Map<?, ?> getAllRequest() throws BMException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void setRequestFlag(Status status, Integer id) throws BMException {
+		// TODO Auto-generated method stub
+		
+	}
+	
+
 	
 }

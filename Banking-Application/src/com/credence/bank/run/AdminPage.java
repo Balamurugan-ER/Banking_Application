@@ -10,11 +10,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.credence.bank.info.AccountsInfo;
+import com.credence.bank.info.RequestInfo;
 import com.credence.bank.info.TransactionInfo;
 import com.credence.bank.info.UserInfo;
 import com.credence.bank.routes.BankingRouter;
 import com.credence.bank.routes.BankingRouterProvider;
 import com.credence.bank.util.BMException;
+import com.credence.bank.util.Utilities;
 
 /**
  * @author Balamurugan
@@ -59,6 +61,9 @@ public class AdminPage
 				+ "25.get all Pending Transactions\n"
 				+ "26.Reject Transaction"
 				+ "27.grant Approval for Transactions\n"
+				+ "28.Reactivate AccountNumber\n"
+				+ "29.Reactivate User\n"
+				+ "30.get all Request"
 				+ "100.Run initial Setup\n"
 				+ "150.Save Changes\n"
 				+ "0.Exit");
@@ -862,6 +867,7 @@ public class AdminPage
 				try 
 				{
 					Map<Integer,TransactionInfo> allTransaction = (Map<Integer, TransactionInfo>) bankingRouter.getAllPendingTransaction();
+					Utilities.INST.isNull(allTransaction);
 					for(Integer transaction : allTransaction.keySet())
 					{
 						System.out.println(allTransaction.get(transaction));
@@ -928,6 +934,83 @@ public class AdminPage
 				catch(InputMismatchException e)
 				{
 					throw new BMException("Invalid Input",e);
+				}
+				break;
+			}
+			case 28:
+			{
+				
+				try 
+				{
+					logConsole.log(Level.INFO, "RequestId to Approve Request : ");
+					Integer requestId = scan.nextInt();
+					logConsole.log(Level.INFO, "AccountNumber : ");
+					Integer accountNumber = scan.nextInt();
+					bankingRouter.reActivateAccount(accountNumber,requestId);
+					
+					System.out.println("request Approved");
+
+				}
+				catch (BMException e) 
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input",e);
+				}
+				break;
+
+			}
+			case 29:
+			{
+				
+				try 
+				{
+					logConsole.log(Level.INFO, "RequestId to Approve Request : ");
+					Integer requestId = scan.nextInt();
+					logConsole.log(Level.INFO, "User id : ");
+					Integer userId = scan.nextInt();
+					bankingRouter.reActivateUser(userId,requestId);
+					System.out.println("request Approved");
+
+				}
+				catch (BMException e) 
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
+				}
+				catch(InputMismatchException e)
+				{
+					throw new BMException("Invalid Input",e);
+				}
+				break;
+			}
+			case 30:
+			{
+				try
+				{
+					System.out.println("---------------All Requests--------------------------");
+					Map<Integer,RequestInfo> request = (Map<Integer, RequestInfo>) bankingRouter.getAllRequests();
+					for(Integer id : request.keySet())
+					{
+						System.out.println(request.get(id));
+					}
+				}
+				catch (BMException e) 
+				{
+					logConsole.log(Level.SEVERE, e.getMessage(), e.getCause());
+					if(e.getMessage().equals("Session Time Expired Login Again"))
+					{
+						throw new BMException("Session Time Expired Login Again");
+					}
 				}
 				break;
 			}
